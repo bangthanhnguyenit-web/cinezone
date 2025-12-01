@@ -1,0 +1,69 @@
+﻿@model IEnumerable<CINEMA.Models.Movie>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead class="table-dark">
+            <tr>
+                <th class="text-center">Poster</th>
+                <th>Tên phim</th>
+                <th>Thời lượng</th>
+                <th>Khởi chiếu</th>
+                <th>Quốc gia</th>
+                <th>Ngôn ngữ</th>
+                <th>Độ tuổi</th>
+                <th>Trạng thái</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var m in Model)
+                {
+                    <tr>
+                        <td class="text-center">
+                            <img src="@m.PosterUrl" class="rounded shadow-sm"
+                                 style="width:60px; height:80px; object-fit:cover;" />
+                        </td>
+                        <td class="fw-semibold">@m.Title</td>
+                        <td>@m.Duration phút</td>
+                        <td>@m.ReleaseDate?.ToString("dd/MM/yyyy")</td>
+                        <td>@m.Country</td>
+                        <td>@m.Language</td>
+                        <td>@m.AgeRating</td>
+
+                        <td>
+                            <span class="badge bg-danger">Ngừng chiếu</span>
+                        </td>
+
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <a asp-action="Details" asp-route-id="@m.MovieId"
+                                   class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@m.MovieId"
+                                   class="btn btn-sm btn-outline-warning">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@m.MovieId"
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Xóa phim @m.Title ?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="9" class="text-center py-4 text-muted">
+                        🛑 Chưa có phim ngừng chiếu
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

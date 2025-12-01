@@ -9,6 +9,13 @@
         <h1 class="fw-bold mb-2" style="color: #059669; font-size: 2.5rem;">Xin chào, @ViewBag.Name 👋</h1>
         <p class="text-muted fs-5">Quản lý hệ thống rạp chiếu phim của bạn</p>
     </div>
+    <!-- MINI DASHBOARD ( View Component ) --> 
+    <div class="mb-5">
+        @await Component.InvokeAsync("RevenueDashboard", new {
+        from = (DateTime?)null,
+                to = (DateTime?)null
+                })
+    </div>
 
     <!-- Dashboard Cards -->
     <div class="row g-4">

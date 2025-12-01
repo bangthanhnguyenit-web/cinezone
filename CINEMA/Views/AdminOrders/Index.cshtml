@@ -2,80 +2,46 @@
 @{
     ViewData["Title"] = "Quản lý đơn hàng";
     Layout = "_AdminLayout";
+
+    var pending = Model.Where(o => o.Status == "Đang chờ thanh toán");
+    var paid = Model.Where(o => o.Status == "Đã thanh toán");
+    var failed = Model.Where(o => o.Status == "Thanh toán thất bại" || o.Status == "Đã hủy");
 }
 
 <div class="container mt-4">
     <h2 class="fw-bold text-center mb-4 text-gradient">📦 Quản lý đơn hàng</h2>
 
-    <!-- Bộ lọc -->
-    <form class="d-flex mb-4 justify-content-between">
-        <input type="text" name="search" class="form-control w-50" placeholder="🔍 Tìm theo tên khách hàng hoặc mã đơn...">
-        <select name="status" class="form-select w-25 mx-2">
-            <option value="">-- Trạng thái --</option>
-            <option>Đang chờ thanh toán</option>
-            <option>Đã thanh toán</option>
-            <option>Thanh toán thất bại</option>
-            <option>Đã hủy</option>
-        </select>
-        <button class="btn btn-primary">Lọc</button>
-    </form>
+    <!-- ========== KHUNG 1: ĐÃ THANH TOÁN ========== -->
+    
+    <div class="card shadow mb-5">
+        <div class="card-header bg-success text-white fw-bold">
+            ✔️ Đơn đã thanh toán
+        </div>
+        <div class="card-body p-0">
+            @await Html.PartialAsync("_OrderTable", paid)
+        </div>
+    </div>
+    <!-- ========== KHUNG 2: ĐANG CHỜ ========== -->
+    <div class="card shadow mb-5">
+        <div class="card-header bg-warning text-dark fw-bold">
+            ⏳ Đơn đang chờ thanh toán
+        </div>
+        <div class="card-body p-0">
+            @await Html.PartialAsync("_OrderTable", pending)
+        </div>
+    </div>
 
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info text-center">Không có đơn hàng nào.</div>
-    }
-    else
-    {
-        <table class="table table-bordered table-hover text-center align-middle shadow-sm">
-            <thead class="table-dark">
-                <tr>
-                    <th>Mã đơn</th>
-                    <th>Khách hàng</th>
-                    <th>Ngày đặt</th>
-                    <th>Tổng tiền</th>
-                    <th>Trạng thái</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var o in Model)
-                {
-                    string badgeClass = o.Status switch
-                    {
-                        "Đã thanh toán" => "success",
-                        "Đang chờ thanh toán" => "warning text-dark",
-                        "Thanh toán thất bại" => "secondary",
-                        "Đã hủy" => "danger",
-                        _ => "light text-dark"
-                    };
+    
 
-                    <tr>
-                        <td><strong>@("CZ" + o.OrderId.ToString("D6"))</strong></td>
-                        <td>@o.Customer?.FullName</td>
-                        <td>@o.CreatedAt?.ToString("dd/MM/yyyy HH:mm")</td>
-                        <td class="text-danger fw-bold">@String.Format("{0:N0} ₫", o.TotalAmount)</td>
-                        <td>
-                            <span class="badge bg-@badgeClass">@o.Status</span>
-                        </td>
-                        <td>
-                            <a asp-action="Details" asp-route-id="@o.OrderId" class="btn btn-sm btn-info text-white">
-                                <i class="bi bi-eye"></i> Xem
-                            </a>
-                            <a asp-action="Edit" asp-route-id="@o.OrderId" class="btn btn-sm btn-warning text-white">
-                                <i class="bi bi-pencil"></i> Sửa
-                            </a>
-                            <form asp-action="Delete" method="post" style="display:inline;">
-                                <input type="hidden" name="id" value="@o.OrderId" />
-                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Xóa đơn này?');">
-                                    <i class="bi bi-trash"></i> Xóa
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+    <!-- ========== KHUNG 3: THẤT BẠI / HỦY ========== -->
+    <div class="card shadow mb-5">
+        <div class="card-header bg-danger text-white fw-bold">
+            ❌ Đơn thất bại hoặc đã hủy
+        </div>
+        <div class="card-body p-0">
+            @await Html.PartialAsync("_OrderTable", failed)
+        </div>
+    </div>
 </div>
 
 <style>

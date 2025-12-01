@@ -10,25 +10,43 @@
     <form asp-action="Edit" method="post">
         <input type="hidden" asp-for="TheaterId" />
 
-        <div class="mb-3">
-            <label class="form-label">Tên rạp</label>
-            <input asp-for="Name" class="form-control" required />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Địa chỉ</label>
-            <input asp-for="Address" class="form-control" />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Điện thoại</label>
-            <input asp-for="Phone" class="form-control" />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Google Map URL</label>
-            <input asp-for="GoogleMapUrl" class="form-control" />
-        </div>
-        <div class="form-check mb-3">
-            <input asp-for="IsActive" class="form-check-input" />
-            <label class="form-check-label">Hoạt động</label>
+        <div class="row">
+
+            <!-- Cột trái -->
+            <div class="col-md-6">
+
+                <div class="mb-3">
+                    <label class="form-label">Tên rạp</label>
+                    <input asp-for="Name" class="form-control" required />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Điện thoại</label>
+                    <input asp-for="Phone" class="form-control" />
+                </div>
+
+            </div>
+
+            <!-- Cột phải -->
+            <div class="col-md-6">
+
+                <div class="mb-3">
+                    <label class="form-label">Địa chỉ</label>
+                    <input asp-for="Address" class="form-control" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Google Map URL</label>
+                    <input asp-for="GoogleMapUrl" class="form-control" />
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label class="form-check-label">Hoạt động</label>
+                </div>
+
+            </div>
+
         </div>
 
         <button type="submit" class="btn btn-warning">Cập nhật</button>

@@ -1,0 +1,49 @@
+﻿@model CINEMA.ViewModels.RevenueDashboardViewModel
+
+<div class="row g-3">
+
+    <!-- Doanh thu hôm nay -->
+    <div class="col-md-3 col-sm-6">
+        <div class="p-3 rounded-4 shadow-sm bg-light text-center">
+            <div class="text-muted fw-semibold">Hôm nay</div>
+            <div class="fs-4 fw-bold text-success">
+                @Model.TodayRevenue.ToString("N0") ₫
+            </div>
+            <div class="small text-secondary">@Model.TodayTickets vé</div>
+        </div>
+    </div>
+
+    <!-- Doanh thu tháng này -->
+    <div class="col-md-3 col-sm-6">
+        <div class="p-3 rounded-4 shadow-sm bg-light text-center">
+            <div class="text-muted fw-semibold">Tháng này</div>
+            <div class="fs-4 fw-bold text-primary">
+                @Model.MonthRevenue.ToString("N0") ₫
+            </div>
+            <div class="small text-secondary">@Model.MonthTickets vé</div>
+        </div>
+    </div>
+
+    <!-- Tổng doanh thu -->
+    <div class="col-md-3 col-sm-6">
+        <div class="p-3 rounded-4 shadow-sm bg-light text-center">
+            <div class="text-muted fw-semibold">Tổng doanh thu</div>
+            <div class="fs-4 fw-bold text-danger">
+                @Model.TotalRevenue.ToString("N0") ₫
+            </div>
+            <div class="small text-secondary">@Model.TotalTickets vé</div>
+        </div>
+    </div>
+
+    <!-- Combo -->
+    <div class="col-md-3 col-sm-6">
+        <div class="p-3 rounded-4 shadow-sm bg-light text-center">
+            <div class="text-muted fw-semibold">Combo bắp nước</div>
+            <div class="fs-4 fw-bold text-warning">
+                @Model.ComboRevenue.ToString("N0") ₫
+            </div>
+            <div class="small text-secondary">@Model.ComboSold combo</div>
+        </div>
+    </div>
+
+</div>
