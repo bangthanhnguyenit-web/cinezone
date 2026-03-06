@@ -1,0 +1,78 @@
+﻿@model CINEMA.Models.Popup
+
+@{
+    ViewData["Title"] = "Thêm Popup";
+}
+
+<h2>Thêm Popup Quảng Cáo</h2>
+
+<form asp-action="Create" method="post">
+
+    <!-- Tiêu đề -->
+    <div class="mb-3">
+        <label class="form-label">Tiêu đề</label>
+        <input asp-for="Title" class="form-control"
+               placeholder="Ví dụ: Giảm giá 50% cuối tuần" />
+    </div>
+
+    <!-- Mô tả -->
+    <div class="mb-3">
+        <label class="form-label">Mô tả</label>
+        <textarea asp-for="Description"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Ví dụ: Ưu đãi đặc biệt cho khách đặt vé"></textarea>
+    </div>
+
+    <!-- Ảnh -->
+    <div class="mb-3">
+        <label class="form-label">Link ảnh popup</label>
+        <input asp-for="ImageUrl"
+               class="form-control"
+               placeholder="/images/popup-sale.jpg" />
+    </div>
+
+    <!-- Link -->
+    <div class="mb-3">
+        <label class="form-label">Link nút</label>
+        <input asp-for="ButtonLink"
+               class="form-control"
+               placeholder="/Home/Schedule" />
+    </div>
+
+    <!-- Ngày bắt đầu -->
+    <div class="mb-3">
+        <label class="form-label">Ngày bắt đầu</label>
+        <input asp-for="StartDate"
+               type="datetime-local"
+               class="form-control" />
+    </div>
+
+    <!-- Ngày kết thúc -->
+    <div class="mb-3">
+        <label class="form-label">Ngày kết thúc</label>
+        <input asp-for="EndDate"
+               type="datetime-local"
+               class="form-control" />
+    </div>
+
+    <!-- Hiển thị -->
+    <div class="form-check mb-3">
+        <input asp-for="IsActive"
+               class="form-check-input" />
+
+        <label asp-for="IsActive"
+               class="form-check-label">
+            Hiển thị popup
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Thêm Popup
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Quay lại
+    </a>
+
+</form>

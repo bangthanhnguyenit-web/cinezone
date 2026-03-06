@@ -1,0 +1,98 @@
+﻿@model IEnumerable<CINEMA.Models.Popup>
+
+@{
+    ViewData["Title"] = "Quản lý Popup";
+}
+
+<div class="container mt-4">
+
+    <h2 class="mb-3">Quản lý Popup</h2>
+
+    <a asp-action="Create" class="btn btn-success mb-3">
+        + Thêm Popup
+    </a>
+
+    <table class="table table-bordered table-hover align-middle">
+
+        <thead class="table-dark">
+            <tr>
+                <th>Tiêu đề</th>
+                <th>Ảnh</th>
+                <th>Trạng thái</th>
+                <th width="220">Chức năng</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @if (Model == null || !Model.Any())
+            {
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        Chưa có popup nào
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var item in Model)
+                {
+                    <tr>
+
+                        <td>
+                            <strong>@item.Title</strong>
+                        </td>
+
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.ImageUrl))
+                            {
+                                <img src="@item.ImageUrl"
+                                     style="width:120px;height:70px;object-fit:cover;border-radius:8px;" />
+                            }
+                            else
+                            {
+                                <span class="text-muted">Không có ảnh</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (item.IsActive)
+                            {
+                                <span class="badge bg-success">
+                                    Hiển thị
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">
+                                    Ẩn
+                                </span>
+                            }
+                        </td>
+
+                        <td>
+
+                            <a asp-action="Edit"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-primary btn-sm">
+                                Sửa
+                            </a>
+
+                            <a asp-action="Delete"
+                                   asp-route-id="@item.Id"
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Bạn có chắc muốn xóa popup này?');">
+                                Xóa
+                            </a>
+
+                        </td>
+
+                    </tr>
+                }
+            }
+
+        </tbody>
+
+    </table>
+
+</div>

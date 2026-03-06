@@ -16,59 +16,61 @@ namespace CINEMA.Controllers
             _context = context;
         }
 
-        // ===============================================================
-        // ============================ TRANG CHỦ =========================
-        // ===============================================================
+        // =====================================================
+        // ====================== TRANG CHỦ ====================
+        // =====================================================
 
         public IActionResult Index()
         {
-            // Tất cả phim đang chiếu
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            // Phim đang chiếu
             var movies = _context.Movies
                 .Where(m => m.IsActive == true)
                 .OrderByDescending(m => m.ReleaseDate)
                 .ToList();
 
-            // Hôm nay (DateOnly để so sánh với ReleaseDate)
-            var today = DateOnly.FromDateTime(DateTime.Today);
-
             // Phim sắp chiếu
             var comingSoon = _context.Movies
-                .Where(m => m.IsActive == true
-                            && m.ReleaseDate.HasValue
-                            && m.ReleaseDate.Value > today)
+                .Where(m => m.IsActive == true &&
+                            m.ReleaseDate.HasValue &&
+                            m.ReleaseDate > today)
                 .OrderBy(m => m.ReleaseDate)
                 .ToList();
 
-            // Danh sách rạp cho dropdown "Đặt vé nhanh"
+            // Rạp
             var theaters = _context.Theaters
                 .Where(t => t.IsActive == true)
                 .OrderBy(t => t.Name)
                 .ToList();
 
+            // Popup quảng cáo
+            var popup = _context.Popups
+                .FirstOrDefault(p => p.IsActive == true);
+
             ViewBag.ComingSoon = comingSoon;
             ViewBag.Theaters = theaters;
+            ViewBag.Popup = popup;
 
             return View(movies);
         }
 
+        // =====================================================
+        // ================== API QUICK BOOKING =================
+        // =====================================================
 
-        // ===============================================================
-        // ====================== API CHỌN RẠP / PHIM / SUẤT ==============
-        // ===============================================================
-
-        // 🔹 Lấy danh sách phim theo rạp
+        // Lấy phim theo rạp
         [HttpGet]
         public IActionResult GetMoviesByTheater(int theaterId)
         {
             var movies = _context.Showtimes
                 .Include(s => s.Movie)
                 .Include(s => s.Auditorium)
-                    .ThenInclude(a => a.Theater)
-                .Where(s => s.Auditorium.TheaterId == theaterId
-                            && s.IsActive == true
-                            && s.Movie.IsActive == true
-                            && s.StartTime.HasValue
-                            && s.StartTime.Value >= DateTime.Now)
+                .Where(s =>
+                       s.Auditorium.TheaterId == theaterId &&
+                       s.IsActive == true &&
+                       s.Movie.IsActive == true &&
+                       s.StartTime >= DateTime.Now)
                 .Select(s => new
                 {
                     s.Movie.MovieId,
@@ -81,18 +83,17 @@ namespace CINEMA.Controllers
             return Json(movies);
         }
 
-        // 🔹 Lấy suất chiếu theo rạp + phim
+        // Lấy suất chiếu
         [HttpGet]
         public IActionResult GetShowtimes(int theaterId, int movieId)
         {
             var showtimes = _context.Showtimes
                 .Include(s => s.Auditorium)
-                    .ThenInclude(a => a.Theater)
-                .Where(s => s.Auditorium.TheaterId == theaterId
-                            && s.MovieId == movieId
-                            && s.IsActive == true
-                            && s.StartTime.HasValue
-                            && s.StartTime.Value >= DateTime.Now)
+                .Where(s =>
+                       s.Auditorium.TheaterId == theaterId &&
+                       s.MovieId == movieId &&
+                       s.IsActive == true &&
+                       s.StartTime >= DateTime.Now)
                 .OrderBy(s => s.StartTime)
                 .Select(s => new
                 {
@@ -106,12 +107,10 @@ namespace CINEMA.Controllers
             return Json(showtimes);
         }
 
+        // =====================================================
+        // ======================= ĐẶT VÉ =======================
+        // =====================================================
 
-        // ===============================================================
-        // ============================ ĐẶT VÉ =============================
-        // ===============================================================
-
-        // 🔹 GET: Trang chọn ghế
         [HttpGet]
         public IActionResult BookTicket(int id, int? showtimeId)
         {
@@ -122,61 +121,46 @@ namespace CINEMA.Controllers
             if (movie == null)
                 return NotFound("Không tìm thấy phim.");
 
-            // Nếu chưa chọn suất → chọn suất sớm nhất
+            // Nếu chưa chọn suất → lấy suất sớm nhất
             if (!showtimeId.HasValue)
             {
                 showtimeId = _context.Showtimes
-                    .Where(s => s.MovieId == id
-                                && s.IsActive == true
-                                && s.StartTime.HasValue
-                                && s.StartTime.Value >= DateTime.Now)
+                    .Where(s =>
+                        s.MovieId == id &&
+                        s.IsActive == true &&
+                        s.StartTime >= DateTime.Now)
                     .OrderBy(s => s.StartTime)
                     .Select(s => s.ShowtimeId)
                     .FirstOrDefault();
             }
 
-            Showtime? showtime = null;
+            var showtime = _context.Showtimes
+                .Include(s => s.Auditorium)
+                    .ThenInclude(a => a.Theater)
+                .FirstOrDefault(s => s.ShowtimeId == showtimeId && s.IsActive == true);
 
-            if (showtimeId.HasValue && showtimeId.Value != 0)
-            {
-                showtime = _context.Showtimes
-                    .Include(s => s.Auditorium)
-                        .ThenInclude(a => a.Theater)
-                    .FirstOrDefault(s => s.ShowtimeId == showtimeId.Value
-                                         && s.IsActive == true);
-            }
-
-            // Tải ghế
-            var seats = new List<Seat>();
-            if (showtime?.AuditoriumId != null)
-            {
-                seats = _context.Seats
-                    .Where(s => s.AuditoriumId == showtime.AuditoriumId
-                                && s.IsActive == true)
-                    .OrderBy(s => s.RowLabel)
-                    .ThenBy(s => s.SeatNumber)
-                    .ToList();
-            }
+            // Ghế
+            var seats = _context.Seats
+                .Where(s => s.AuditoriumId == showtime.AuditoriumId && s.IsActive == true)
+                .OrderBy(s => s.RowLabel)
+                .ThenBy(s => s.SeatNumber)
+                .ToList();
 
             // Ghế đã đặt
-            var bookedSeats = new List<string>();
-            if (showtime != null)
-            {
-                bookedSeats = _context.Tickets
-                    .Where(t => t.ShowtimeId == showtime.ShowtimeId)
-                    .Include(t => t.Seat)
-                    .Select(t => t.Seat.RowLabel + t.Seat.SeatNumber)
-                    .ToList();
-            }
+            var bookedSeats = _context.Tickets
+                .Where(t => t.ShowtimeId == showtime.ShowtimeId)
+                .Include(t => t.Seat)
+                .Select(t => t.Seat.RowLabel + t.Seat.SeatNumber)
+                .ToList();
 
             // Suất chiếu
             var showtimes = _context.Showtimes
                 .Include(s => s.Auditorium)
                     .ThenInclude(a => a.Theater)
-                .Where(s => s.MovieId == id
-                            && s.IsActive == true
-                            && s.StartTime.HasValue
-                            && s.StartTime.Value >= DateTime.Now)
+                .Where(s =>
+                       s.MovieId == id &&
+                       s.IsActive == true &&
+                       s.StartTime >= DateTime.Now)
                 .OrderBy(s => s.StartTime)
                 .ToList();
 
@@ -187,58 +171,27 @@ namespace CINEMA.Controllers
 
             ViewBag.Showtime = showtime;
             ViewBag.Showtimes = showtimes;
-            ViewBag.Combos = combos;
             ViewBag.Seats = seats;
             ViewBag.BookedSeats = bookedSeats;
+            ViewBag.Combos = combos;
 
             return View(movie);
         }
 
-        // 🔹 POST: Đặt vé nhanh → chuyển đến trang chọn ghế
+        // POST từ Quick Booking
         [HttpPost]
         public IActionResult BookTicket(int movieId, int showtimeId)
         {
-            var movie = _context.Movies
-                .Include(m => m.Genres)
-                .FirstOrDefault(m => m.MovieId == movieId && m.IsActive == true);
-
-            var showtime = _context.Showtimes
-                .Include(s => s.Auditorium)
-                    .ThenInclude(a => a.Theater)
-                .FirstOrDefault(s => s.ShowtimeId == showtimeId && s.IsActive == true);
-
-            if (movie == null || showtime == null)
-                return NotFound("Không tìm thấy phim hoặc suất chiếu.");
-
-            var combos = _context.Combos
-                .Where(c => c.IsActive == true)
-                .ToList();
-
-            var seats = _context.Seats
-                .Where(s => s.AuditoriumId == showtime.AuditoriumId
-                            && s.IsActive == true)
-                .OrderBy(s => s.RowLabel)
-                .ThenBy(s => s.SeatNumber)
-                .ToList();
-
-            var bookedSeats = _context.Tickets
-                .Where(t => t.ShowtimeId == showtimeId)
-                .Include(t => t.Seat)
-                .Select(t => t.Seat.RowLabel + t.Seat.SeatNumber)
-                .ToList();
-
-            ViewBag.Showtime = showtime;
-            ViewBag.Combos = combos;
-            ViewBag.Seats = seats;
-            ViewBag.BookedSeats = bookedSeats;
-
-            return View(movie);
+            return RedirectToAction("BookTicket", new
+            {
+                id = movieId,
+                showtimeId = showtimeId
+            });
         }
 
-
-        // ===============================================================
-        // ============================ LỊCH CHIẾU =========================
-        // ===============================================================
+        // =====================================================
+        // ======================= LỊCH CHIẾU ===================
+        // =====================================================
 
         [HttpGet]
         public IActionResult Schedule(DateTime? date)
@@ -250,26 +203,28 @@ namespace CINEMA.Controllers
                 .Include(m => m.Showtimes)
                     .ThenInclude(s => s.Auditorium)
                     .ThenInclude(a => a.Theater)
-                .Where(m => m.IsActive == true
-                            && m.Showtimes.Any(s =>
-                                   s.StartTime.HasValue
-                                   && s.StartTime.Value.Date == selectedDate))
+                .Where(m =>
+                       m.IsActive == true &&
+                       m.Showtimes.Any(s =>
+                           s.StartTime.HasValue &&
+                           s.StartTime.Value.Date == selectedDate))
                 .OrderBy(m => m.Title)
                 .ToList();
 
             ViewBag.SelectedDate = selectedDate;
+
             return View(movies);
         }
 
-
-        // ===============================================================
-        // ============================ THANH TOÁN ========================
-        // ===============================================================
+        // =====================================================
+        // ======================= THANH TOÁN ===================
+        // =====================================================
 
         [HttpPost]
         public IActionResult GoToPayment(int movieId, int showtimeId, string selectedSeats, int comboId)
         {
             var movie = _context.Movies.FirstOrDefault(m => m.MovieId == movieId);
+
             var showtime = _context.Showtimes
                 .Include(s => s.Auditorium)
                     .ThenInclude(a => a.Theater)
@@ -281,7 +236,7 @@ namespace CINEMA.Controllers
                 return NotFound("Phim hoặc suất chiếu không tồn tại.");
 
             int seatCount = selectedSeats
-                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Length;
 
             decimal ticketPrice = (showtime.BasePrice ?? 0) * seatCount;
@@ -297,12 +252,14 @@ namespace CINEMA.Controllers
             return View("Payment");
         }
 
+        // =====================================================
+        // =================== PRIVACY / ERROR ==================
+        // =====================================================
 
-        // ===============================================================
-        // ======================== PRIVACY / ERROR =======================
-        // ===============================================================
-
-        public IActionResult Privacy() => View();
+        public IActionResult Privacy()
+        {
+            return View();
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

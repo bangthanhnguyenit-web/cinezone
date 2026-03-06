@@ -1,0 +1,14 @@
+﻿@model CINEMA.Models.Popup
+
+<h2>@Model.Title</h2>
+
+<img src="@Model.ImageUrl" style="width:300px" />
+
+<p>@Model.Description</p>
+
+<a href="@Model.ButtonLink" class="btn btn-primary">Xem ngay</a>
+
+<br />
+<br />
+
+<a asp-action="Index">Quay lại</a>

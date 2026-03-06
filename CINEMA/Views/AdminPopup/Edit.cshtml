@@ -1,0 +1,85 @@
+﻿@model CINEMA.Models.Popup
+
+@{
+    ViewData["Title"] = "Sửa Popup";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Sửa Popup Quảng Cáo</h2>
+
+    <form asp-action="Edit" method="post">
+
+        <input type="hidden" asp-for="Id" />
+
+        <!-- Tiêu đề -->
+        <div class="mb-3">
+            <label asp-for="Title" class="form-label">Tiêu đề</label>
+            <input asp-for="Title" class="form-control" placeholder="Nhập tiêu đề popup" />
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <!-- Mô tả -->
+        <div class="mb-3">
+            <label asp-for="Description" class="form-label">Mô tả</label>
+            <textarea asp-for="Description" class="form-control" rows="3" placeholder="Nhập mô tả"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
+
+        <!-- Ảnh -->
+        <div class="mb-3">
+            <label asp-for="ImageUrl" class="form-label">Link ảnh</label>
+            <input asp-for="ImageUrl" class="form-control" placeholder="/images/popup-sale.jpg" />
+            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+
+            @if (!string.IsNullOrEmpty(Model.ImageUrl))
+            {
+                <div class="mt-2">
+                    <img src="@Model.ImageUrl" style="max-width:300px;border-radius:10px;" />
+                </div>
+            }
+        </div>
+
+        <!-- Link nút -->
+        <div class="mb-3">
+            <label asp-for="ButtonLink" class="form-label">Link nút</label>
+            <input asp-for="ButtonLink" class="form-control" placeholder="Ví dụ: /Home/Schedule" />
+            <span asp-validation-for="ButtonLink" class="text-danger"></span>
+        </div>
+
+        <!-- Ngày bắt đầu -->
+        <div class="mb-3">
+            <label asp-for="StartDate" class="form-label">Ngày bắt đầu</label>
+            <input asp-for="StartDate" type="date" class="form-control" />
+            <span asp-validation-for="StartDate" class="text-danger"></span>
+        </div>
+
+        <!-- Ngày kết thúc -->
+        <div class="mb-3">
+            <label asp-for="EndDate" class="form-label">Ngày kết thúc</label>
+            <input asp-for="EndDate" type="date" class="form-control" />
+            <span asp-validation-for="EndDate" class="text-danger"></span>
+        </div>
+
+        <!-- Hiển thị -->
+        <div class="form-check mb-3">
+            <input asp-for="IsActive" class="form-check-input" />
+            <label asp-for="IsActive" class="form-check-label">
+                Hiển thị popup
+            </label>
+        </div>
+
+        <!-- Button -->
+        <button type="submit" class="btn btn-success">
+            Lưu thay đổi
+        </button>
+
+        <a asp-action="Index" class="btn btn-secondary">
+            Quay lại
+        </a>
+
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

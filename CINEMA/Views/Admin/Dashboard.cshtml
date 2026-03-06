@@ -138,7 +138,30 @@
                 </div>
             </div>
         </div>
+        <!-- Quản lý Popup -->
+        <div class="col-md-4">
+            <div class="card dashboard-card purple">
+                <div class="card-body text-center text-white">
+                    <div class="icon">📢</div>
+                    <h5 class="card-title">Quản lý Popup</h5>
 
+                    <div class="btn-group-custom">
+                        <a asp-controller="AdminPopup"
+                               asp-action="Index"
+                               class="btn btn-light">
+                            Xem Popup
+                        </a>
+
+                        <a asp-controller="AdminPopup"
+                               asp-action="Create"
+                               class="btn btn-outline-light">
+                            Thêm Popup
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
