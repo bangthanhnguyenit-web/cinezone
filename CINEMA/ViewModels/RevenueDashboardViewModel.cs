@@ -38,7 +38,9 @@ namespace CINEMA.ViewModels
         public List<string> ComboLabelsByMonth { get; set; } = new();
         public List<decimal> ComboRevenueByMonth { get; set; } = new();
         public List<int> ComboQuantityByMonth { get; set; } = new();
-
+        public int PaidOrders { get; set; }
+        public int PendingOrders { get; set; }
+        public int CancelledOrders { get; set; }
         public List<int> TicketCountByDate { get; set; } = new();
         public List<int> TicketCountByMonth { get; set; } = new();
         public List<int> TicketCountByYear { get; set; } = new();

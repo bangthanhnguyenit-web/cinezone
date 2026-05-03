@@ -21,6 +21,7 @@ namespace CINEMA
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession();
             builder.Services.AddScoped<IVnpayService, VnpayService>();
+            builder.Services.AddScoped<GeminiService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

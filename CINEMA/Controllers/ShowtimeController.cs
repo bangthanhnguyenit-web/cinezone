@@ -149,5 +149,28 @@ namespace CINEMA.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+        [HttpPost]
+        public async Task<IActionResult> Deactivate(int id)
+        {
+            var show = await _context.Showtimes.FindAsync(id);
+            if (show == null) return NotFound();
+
+            show.IsActive = false;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public IActionResult CreateMultiple(List<Showtime> showtimes)
+        {
+            if (showtimes != null && showtimes.Any())
+            {
+                _context.Showtimes.AddRange(showtimes);
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("Index");
+        }
     }
+
 }

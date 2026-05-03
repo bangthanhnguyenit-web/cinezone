@@ -4,32 +4,117 @@
     Layout = "_AdminLayout";
 }
 
-<div class="container mt-4">
-    <h2 class="fw-bold text-success mb-3">➕ Thêm Thể loại mới</h2>
+<div class="container py-4">
 
-    <form asp-action="Create" method="post">
-        <div class="mb-3">
-            <label class="form-label">Tên thể loại</label>
-            <input asp-for="Name" class="form-control" />
+    <div class="card shadow border-0 rounded-4 mx-auto" style="max-width:750px;">
+        <div class="card-header bg-success text-white fw-bold fs-5">
+            ➕ Thêm thể loại mới
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">Mô tả</label>
-            <textarea asp-for="Description" class="form-control"></textarea>
-        </div>
+        <div class="card-body p-4">
 
-        <div class="mb-3">
-            <label class="form-label">Chọn phim thuộc thể loại này</label>
-            <select name="selectedMovies" class="form-select" multiple size="6">
-                @foreach (var movie in ViewBag.Movies)
-                {
-                    <option value="@movie.MovieId">@movie.Title</option>
-                }
-            </select>
-            <small class="text-muted">Giữ Ctrl để chọn nhiều phim</small>
-        </div>
+            <form asp-action="Create" method="post">
 
-        <button type="submit" class="btn btn-success">Lưu</button>
-        <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
-    </form>
+                <!-- NAME -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Tên thể loại</label>
+                    <input asp-for="Name"
+                           class="form-control rounded-3"
+                           placeholder="Ví dụ: Hành động, Tình cảm..." />
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Mô tả</label>
+                    <textarea asp-for="Description"
+                              class="form-control rounded-3"
+                              rows="3"
+                              placeholder="Mô tả ngắn về thể loại..."></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">🎬 Chọn phim đang chiếu</label>
+
+                    <div class="row g-3" style="max-height:300px; overflow-y:auto;">
+
+                        @foreach (var movie in ViewBag.Movies)
+                        {
+                            <div class="col-md-6">
+                                <div class="form-check p-3 border rounded-3 shadow-sm movie-item">
+
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           name="selectedMovies"
+                                           value="@movie.MovieId"
+                                           id="movie_@movie.MovieId" />
+
+                                    <label class="form-check-label w-100 ms-2"
+                                           for="movie_@movie.MovieId">
+
+                                        <div class="fw-semibold">
+                                            🎬 @movie.Title
+                                        </div>
+
+                                        <small class="text-muted">
+                                            @movie.ReleaseDate?.ToString("dd/MM/yyyy")
+                                        </small>
+
+                                    </label>
+                                </div>
+                            </div>
+                        }
+
+                    </div>
+
+                    <small class="text-muted">Chọn một hoặc nhiều phim</small>
+                </div>
+                <!-- BUTTON -->
+                <div class="d-flex justify-content-between mt-4">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        ⬅ Quay lại
+                    </a>
+
+                    <button type="submit" class="btn btn-success px-4 shadow-sm">
+                        💾 Lưu
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
 </div>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+        $('#movieSelect').select2({
+        placeholder: "🔍 Tìm và chọn phim...",
+        allowClear: true,
+        width: '100%',
+        closeOnSelect: false
+        });
+        });
+    </script>
+}
+<style>
+    .movie-item {
+    cursor: pointer;
+    transition: all 0.2s ease;
+    }
+
+    .movie-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .movie-item input:checked + label {
+    color: #198754;
+    font-weight: 600;
+    }
+
+    .movie-item input:checked {
+    accent-color: #198754;
+    }
+</style>

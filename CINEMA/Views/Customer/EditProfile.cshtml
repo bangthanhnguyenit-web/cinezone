@@ -1,0 +1,60 @@
+﻿@model CINEMA.Models.Customer
+
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="card shadow-lg p-4" style="width: 500px; border-radius: 15px;">
+
+        <h3 class="text-center mb-4">
+            <i class="bi bi-pencil-square"></i> Chỉnh sửa hồ sơ
+        </h3>
+
+        <form asp-action="EditProfile" method="post" enctype="multipart/form-data">
+
+            <!-- Avatar -->
+            <div class="text-center mb-4">
+                <img id="previewImg"
+                     src="@(string.IsNullOrEmpty(Model.Avatar) ? "/images/default-avatar.png" : Model.Avatar)"
+                     class="rounded-circle shadow"
+                     style="width:120px;height:120px;object-fit:cover;" />
+
+                <div class="mt-2">
+                    <input type="file" name="avatarFile" class="form-control" onchange="preview(event)" />
+                </div>
+            </div>
+
+            <!-- FullName -->
+            <div class="mb-3">
+                <label class="form-label">Họ và tên</label>
+                <input asp-for="FullName" class="form-control" placeholder="Nhập họ tên..." />
+            </div>
+
+            <!-- Phone -->
+            <div class="mb-3">
+                <label class="form-label">Số điện thoại</label>
+                <input asp-for="Phone" class="form-control" placeholder="Nhập số điện thoại..." />
+            </div>
+
+            <!-- Buttons -->
+            <div class="d-flex justify-content-between mt-4">
+                <a asp-action="Profile" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Quay lại
+                </a>
+
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save"></i> Lưu thay đổi
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- Preview Avatar -->
+<script>
+    function preview(event) {
+        var reader = new FileReader();
+        reader.onload = function () {
+            document.getElementById('previewImg').src = reader.result;
+        }
+        reader.readAsDataURL(event.target.files[0]);
+    }
+</script>

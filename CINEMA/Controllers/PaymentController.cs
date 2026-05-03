@@ -32,19 +32,23 @@ namespace CINEMA.Controllers
         public IActionResult Index(
             int MovieId,
             int ShowtimeId,
-            string[] Seats,
+            string selectedSeats,
             int AdultTickets,
             int ChildTickets,
             int StudentTickets,
-            decimal TotalPrice)
+            decimal TotalPrice,
+            string VoucherCode)
         {
             var customerId = HttpContext.Session.GetInt32("CustomerId");
             if (customerId == null)
             {
                 TempData["MovieId"] = MovieId;
                 TempData["ShowtimeId"] = ShowtimeId;
-                TempData["Seats"] = JsonSerializer.Serialize(Seats ?? Array.Empty<string>());
-                TempData["AdultTickets"] = AdultTickets;
+                var seatArray = selectedSeats?
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    ?? Array.Empty<string>();
+
+                TempData["Seats"] = JsonSerializer.Serialize(seatArray); TempData["AdultTickets"] = AdultTickets;
                 TempData["ChildTickets"] = ChildTickets;
                 TempData["StudentTickets"] = StudentTickets;
                 TempData["TotalPrice"] = TotalPrice.ToString(CultureInfo.InvariantCulture);
@@ -65,7 +69,9 @@ namespace CINEMA.Controllers
                 HttpContext.Session.Clear();
                 return RedirectToAction("Login", "Customer", new { message = "Tài khoản không tồn tại." });
             }
-
+            var seatList = selectedSeats?
+    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+    .ToList() ?? new List<string>();
             // 🔥 Load đầy đủ Movie + Auditorium + Theater
             var showtime = _context.Showtimes
                 .Include(s => s.Auditorium)
@@ -95,7 +101,23 @@ namespace CINEMA.Controllers
                     }
                 }
             }
+            // 🎟️ APPLY VOUCHER (HIỂN THỊ)
+            if (!string.IsNullOrEmpty(VoucherCode))
+            {
+                var voucher = _context.Vouchers
+                    .FirstOrDefault(v => v.Code == VoucherCode && v.IsActive);
 
+                if (voucher != null)
+                {
+                    if (voucher.DiscountPercent != null)
+                        TotalPrice -= TotalPrice * (decimal)voucher.DiscountPercent;
+
+                    if (voucher.DiscountAmount != null)
+                        TotalPrice -= voucher.DiscountAmount.Value;
+                }
+            }
+
+            if (TotalPrice < 0) TotalPrice = 0;
             // 📌 Gửi ViewModel
             var vm = new PaymentViewModel
             {
@@ -114,7 +136,7 @@ namespace CINEMA.Controllers
                 TheaterAddress = showtime.Auditorium?.Theater?.Address,
                 TheaterPhone = showtime.Auditorium?.Theater?.Phone,
 
-                SelectedSeats = Seats?.ToList() ?? new List<string>(),
+                SelectedSeats = seatList,
                 AdultTickets = AdultTickets,
                 ChildTickets = ChildTickets,
                 StudentTickets = StudentTickets,
@@ -142,15 +164,49 @@ namespace CINEMA.Controllers
                 decimal comboTotal = model.Combos?.Sum(c => c.Price * c.Quantity) ?? 0;
                 decimal ticketOnlyTotal = model.TotalPrice - comboTotal;
 
+               
                 decimal pricePerTicket = model.SelectedSeats.Count > 0
                     ? ticketOnlyTotal / model.SelectedSeats.Count
                     : 0;
+                decimal total = model.TotalPrice;
+
+                // 🎟️ CHECK VOUCHER DB
+                if (!string.IsNullOrEmpty(model.VoucherCode))
+                {
+                    var voucher = _context.Vouchers
+                        .FirstOrDefault(v => v.Code == model.VoucherCode && v.IsActive);
+
+                    if (voucher != null)
+                    {
+                        if (voucher.ExpiryDate < DateTime.Now)
+                            return Content("Voucher hết hạn");
+
+                        if (voucher.UsedCount >= voucher.Quantity)
+                            return Content("Voucher đã hết lượt");
+
+                        if (total < voucher.MinOrderValue)
+                            return Content("Chưa đủ điều kiện");
+
+                        if (voucher.DiscountPercent != null)
+                            total -= total * (decimal)voucher.DiscountPercent;
+
+                        if (voucher.DiscountAmount != null)
+                            total -= voucher.DiscountAmount.Value;
+
+                        voucher.UsedCount++;
+                        _context.SaveChanges();
+                    }
+                }
+
+                if (total < 0) total = 0;
 
                 // 🔹 Tạo đơn hàng
                 var order = new Order
                 {
                     CustomerId = customerId.Value,
                     CreatedAt = DateTime.Now,
+                    PaidAt = DateTime.Now,
+                    ExpiredAt = DateTime.Now.AddMinutes(15), // 🔥 FIX CHÍNH
                     TotalAmount = model.TotalPrice,
                     Status = (method == "Chuyển khoản") ? "Đang chờ thanh toán" : "Chờ thanh toán",
                     PaymentMethod = method
@@ -259,9 +315,9 @@ namespace CINEMA.Controllers
             catch (Exception ex)
             {
                 transaction.Rollback();
-                _logger.LogError(ex, "❌ Lỗi thanh toán");
-                return View("PaymentError");
+                return Content("LỖI: " + ex.InnerException?.Message ?? ex.Message);
             }
+
         }
 
         // =================== [3] Thanh toán VNPay Callback ===================
@@ -300,6 +356,15 @@ namespace CINEMA.Controllers
                 {
                     t.PaymentStatus = "Đã thanh toán";
                     t.Status = "Đã thanh toán";
+                }
+                // 💎 UPDATE MEMBERSHIP
+                var customer = _context.Customers.Find(order.CustomerId);
+
+                if (customer != null)
+                {
+                    customer.TotalSpent += order.TotalAmount ?? 0;
+                    customer.MembershipLevel = customer.CalculateMembershipLevel();
+
                 }
                 _context.SaveChanges();
 

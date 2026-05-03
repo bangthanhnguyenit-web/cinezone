@@ -19,7 +19,26 @@ namespace CINEMA.Controllers
         // =====================================================
         // ====================== TRANG CHỦ ====================
         // =====================================================
+        [HttpGet]
+        public IActionResult Search(string keyword)
+        {
+            if (string.IsNullOrEmpty(keyword))
+                return RedirectToAction("Index");
 
+            var today = DateOnly.FromDateTime(DateTime.Today);
+
+            var movies = _context.Movies
+                .Where(m =>
+                    m.ReleaseDate.HasValue &&
+                    m.ReleaseDate.Value <= today &&
+                    m.Title.ToLower().Contains(keyword.ToLower())
+                )
+                .ToList();
+
+            ViewBag.Keyword = keyword;
+
+            return View(movies);
+        }
         public IActionResult Index()
         {
             var today = DateOnly.FromDateTime(DateTime.Today);
@@ -89,12 +108,12 @@ namespace CINEMA.Controllers
         {
             var showtimes = _context.Showtimes
                 .Include(s => s.Auditorium)
-                .Where(s =>
+                 .Where(s =>
                        s.Auditorium.TheaterId == theaterId &&
                        s.MovieId == movieId &&
                        s.IsActive == true &&
                        s.StartTime >= DateTime.Now)
-                .OrderBy(s => s.StartTime)
+             .OrderBy(s => s.StartTime)
                 .Select(s => new
                 {
                     s.ShowtimeId,
@@ -106,6 +125,7 @@ namespace CINEMA.Controllers
 
             return Json(showtimes);
         }
+
 
         // =====================================================
         // ======================= ĐẶT VÉ =======================
@@ -121,39 +141,7 @@ namespace CINEMA.Controllers
             if (movie == null)
                 return NotFound("Không tìm thấy phim.");
 
-            // Nếu chưa chọn suất → lấy suất sớm nhất
-            if (!showtimeId.HasValue)
-            {
-                showtimeId = _context.Showtimes
-                    .Where(s =>
-                        s.MovieId == id &&
-                        s.IsActive == true &&
-                        s.StartTime >= DateTime.Now)
-                    .OrderBy(s => s.StartTime)
-                    .Select(s => s.ShowtimeId)
-                    .FirstOrDefault();
-            }
-
-            var showtime = _context.Showtimes
-                .Include(s => s.Auditorium)
-                    .ThenInclude(a => a.Theater)
-                .FirstOrDefault(s => s.ShowtimeId == showtimeId && s.IsActive == true);
-
-            // Ghế
-            var seats = _context.Seats
-                .Where(s => s.AuditoriumId == showtime.AuditoriumId && s.IsActive == true)
-                .OrderBy(s => s.RowLabel)
-                .ThenBy(s => s.SeatNumber)
-                .ToList();
-
-            // Ghế đã đặt
-            var bookedSeats = _context.Tickets
-                .Where(t => t.ShowtimeId == showtime.ShowtimeId)
-                .Include(t => t.Seat)
-                .Select(t => t.Seat.RowLabel + t.Seat.SeatNumber)
-                .ToList();
-
-            // Suất chiếu
+            // Lấy tất cả suất chiếu trước
             var showtimes = _context.Showtimes
                 .Include(s => s.Auditorium)
                     .ThenInclude(a => a.Theater)
@@ -164,7 +152,43 @@ namespace CINEMA.Controllers
                 .OrderBy(s => s.StartTime)
                 .ToList();
 
-            // Combo
+            // ❗ Nếu không có suất chiếu
+            if (!showtimes.Any())
+            {
+                ViewBag.Message = "Phim này hiện chưa có lịch chiếu.";
+                ViewBag.Showtimes = new List<Showtime>();
+                return View(movie); // hoặc redirect trang khác
+            }
+
+            // Nếu chưa chọn thì lấy suất đầu
+            if (!showtimeId.HasValue)
+            {
+                showtimeId = showtimes.First().ShowtimeId;
+            }
+
+            var showtime = showtimes.FirstOrDefault(s => s.ShowtimeId == showtimeId);
+
+            if (showtime == null)
+                return NotFound("Suất chiếu không tồn tại.");
+
+            // Ghế
+            var seats = _context.Seats
+                .Where(s => s.AuditoriumId == showtime.AuditoriumId && s.IsActive == true)
+                .OrderBy(s => s.RowLabel)
+                .ThenBy(s => s.SeatNumber)
+                .ToList();
+
+            var bookedSeats = _context.Tickets
+                .Include(t => t.Seat)
+                .Include(t => t.Order)
+                .Where(t => t.ShowtimeId == showtime.ShowtimeId
+                && t.Order != null
+        && t.Order.Status == "Đã thanh toán")
+    // ✅ CHỈ GHẾ ĐÃ THANH TOÁN
+    .Select(t => t.Seat.RowLabel + t.Seat.SeatNumber)
+    .ToList();
+
+
             var combos = _context.Combos
                 .Where(c => c.IsActive == true)
                 .ToList();
@@ -215,7 +239,6 @@ namespace CINEMA.Controllers
 
             return View(movies);
         }
-
         // =====================================================
         // ======================= THANH TOÁN ===================
         // =====================================================
@@ -223,11 +246,21 @@ namespace CINEMA.Controllers
         [HttpPost]
         public IActionResult GoToPayment(int movieId, int showtimeId, string selectedSeats, int comboId)
         {
-            var movie = _context.Movies.FirstOrDefault(m => m.MovieId == movieId);
+            // ❌ CHƯA CHỌN GHẾ
+            if (string.IsNullOrEmpty(selectedSeats))
+            {
+                TempData["Error"] = "Vui lòng chọn ít nhất 1 ghế!";
+                return RedirectToAction("BookTicket", new
+                {
+                    id = movieId,
+                    showtimeId = showtimeId
+                });
+            }
 
+            var movie = _context.Movies.FirstOrDefault(m => m.MovieId == movieId);
             var showtime = _context.Showtimes
                 .Include(s => s.Auditorium)
-                    .ThenInclude(a => a.Theater)
+                .ThenInclude(a => a.Theater)
                 .FirstOrDefault(s => s.ShowtimeId == showtimeId);
 
             var combo = _context.Combos.FirstOrDefault(c => c.ComboId == comboId);
@@ -267,6 +300,111 @@ namespace CINEMA.Controllers
             return View(new ErrorViewModel
             {
                 RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            });
+        }
+        [HttpPost]
+        public IActionResult ConfirmPayment(int showtimeId, string selectedSeats, int comboId)
+        {
+            // ⚠️ Lấy user (tuỳ bạn login kiểu gì)
+            int customerId = int.Parse(HttpContext.Session.GetString("CustomerId"));
+
+            var showtime = _context.Showtimes.Find(showtimeId);
+            var combo = _context.Combos.FirstOrDefault(c => c.ComboId == comboId);
+
+            if (showtime == null)
+                return NotFound();
+
+            var seatList = selectedSeats.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+            decimal ticketTotal = seatList.Length * (showtime.BasePrice ?? 0);
+            decimal comboPrice = combo?.Price ?? 0;
+            decimal totalAmount = ticketTotal + comboPrice;
+
+            // 🧾 Tạo Order
+            var order = new Order
+            {
+                CustomerId = customerId,
+                CreatedAt = DateTime.Now,
+                Status = "Đã thanh toán",
+                TotalAmount = totalAmount
+            };
+
+            _context.Orders.Add(order);
+            _context.SaveChanges();
+
+            // 🎟️ Tạo Ticket
+            foreach (var seat in seatList)
+            {
+                string row = seat.Substring(0, 1);
+                int number = int.Parse(seat.Substring(1));
+
+                var seatObj = _context.Seats.FirstOrDefault(s =>
+                    s.RowLabel == row &&
+                    s.SeatNumber == number &&
+                    s.AuditoriumId == showtime.AuditoriumId);
+
+                if (seatObj != null)
+                {
+                    _context.Tickets.Add(new Ticket
+                    {
+                        ShowtimeId = showtimeId,
+                        SeatId = seatObj.SeatId,
+                        OrderId = order.OrderId,
+                        Price = showtime.BasePrice
+                    });
+                }
+            }
+
+            _context.SaveChanges();
+
+            // 💎 UPDATE MEMBERSHIP (CHỈ THÊM DÒNG NÀY)
+            var customer = _context.Customers.Find(customerId);
+            if (customer != null)
+            {
+                customer.TotalSpent += totalAmount;
+                _context.SaveChanges();
+            }
+
+            return RedirectToAction("Index"); // hoặc trang success
+        }
+        [HttpGet]
+        public IActionResult CheckVoucher(string code, decimal total)
+        {
+            if (string.IsNullOrEmpty(code))
+                return Json(new { success = false, message = "Chưa nhập mã" });
+
+            var voucher = _context.Vouchers
+                .FirstOrDefault(v => v.Code != null &&
+                                     v.Code.ToLower() == code.ToLower() &&
+                                     v.IsActive);
+
+            if (voucher == null)
+                return Json(new { success = false, message = "Không tồn tại" });
+
+            if (voucher.StartDate != null && voucher.StartDate > DateTime.Now)
+                return Json(new { success = false, message = "Chưa đến thời gian" });
+
+            if (voucher.EndDate != null && voucher.EndDate < DateTime.Now)
+                return Json(new { success = false, message = "Hết hạn" });
+
+            if (voucher.UsedCount >= voucher.Quantity)
+                return Json(new { success = false, message = "Hết lượt" });
+
+            if (total < voucher.MinOrderValue)
+                return Json(new { success = false, message = "Chưa đủ điều kiện" });
+
+            decimal discount = 0;
+
+            if (voucher.DiscountPercent.HasValue)
+                discount = total * (decimal)voucher.DiscountPercent.Value;
+
+            if (voucher.DiscountAmount.HasValue)
+                discount = voucher.DiscountAmount.Value;
+
+            return Json(new
+            {
+                success = true,
+                discount = discount
             });
         }
     }

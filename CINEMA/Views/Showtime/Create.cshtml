@@ -1,79 +1,222 @@
-﻿@model CINEMA.Models.Showtime
+﻿@model List<CINEMA.Models.Showtime>
+
 @{
-    ViewData["Title"] = "Thêm lịch chiếu";
+    ViewData["Title"] = "Thêm nhiều lịch chiếu";
     Layout = "_AdminLayout";
     var movies = ViewBag.Movies as List<CINEMA.Models.Movie>;
     var auditoriums = ViewBag.Auditoriums as List<CINEMA.Models.Auditorium>;
 }
 
 <div class="container mt-4">
-    <h2 class="fw-bold mb-4">➕ Thêm lịch chiếu</h2>
 
-    <form asp-action="Create" method="post" class="mt-3">
+    <div class="card-custom">
+        <h2 class="fw-bold mb-4 d-flex align-items-center">
+            <span class="title-icon">➕</span> Thêm nhiều lịch chiếu
+        </h2>
 
-        <div class="row">
-            <!-- Cột trái -->
-            <div class="col-md-6">
+        <form asp-action="CreateMultiple" method="post">
 
-                <div class="mb-3">
-                    <label class="form-label">Phim</label>
-                    <select class="form-select" asp-for="MovieId">
-                        @foreach (var m in movies)
-                        {
-                            <option value="@m.MovieId">@m.Title</option>
-                        }
-                    </select>
-                </div>
+            <div class="table-responsive">
+                <table class="table align-middle text-center" id="showtimeTable">
+                    <thead>
+                        <tr>
+                            <th>Phim</th>
+                            <th>Rạp</th>
+                            <th>Bắt đầu</th>
+                            <th>Kết thúc</th>
+                            <th>Giá</th>
+                            <th>Ngôn ngữ</th>
+                            <th>Active</th>
+                            <th>Xóa</th>
+                        </tr>
+                    </thead>
 
-                <div class="mb-3">
-                    <label class="form-label">Ngày giờ bắt đầu</label>
-                    <input type="datetime-local" class="form-control" asp-for="StartTime" />
-                </div>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select name="Showtimes[0].MovieId" class="form-select">
+                                    @foreach (var m in movies)
+                                    {
+                                        <option value="@m.MovieId">@m.Title</option>
+                                    }
+                                </select>
+                            </td>
 
-                <div class="mb-3">
-                    <label class="form-label">Giá vé cơ bản</label>
-                    <input type="number" class="form-control" asp-for="BasePrice" />
-                </div>
+                            <td>
+                                <select name="Showtimes[0].AuditoriumId" class="form-select">
+                                    @foreach (var r in auditoriums)
+                                    {
+                                        <option value="@r.AuditoriumId">@r.Name</option>
+                                    }
+                                </select>
+                            </td>
 
-                <div class="form-check mb-3">
-                    <input type="checkbox" class="form-check-input"
-                           name="IsActive" value="true" @(Model?.IsActive == true ? "checked" : "") />
-                    <input type="hidden" name="IsActive" value="false" />
-                    <label class="form-check-label">Đang chiếu</label>
-                </div>
+                            <td>
+                                <input type="datetime-local" name="Showtimes[0].StartTime" class="form-control" />
+                            </td>
 
+                            <td>
+                                <input type="datetime-local" name="Showtimes[0].EndTime" class="form-control" />
+                            </td>
+
+                            <td>
+                                <input type="number" name="Showtimes[0].BasePrice" class="form-control" placeholder="₫" />
+                            </td>
+
+                            <td>
+                                <input type="text" name="Showtimes[0].Language" class="form-control" placeholder="VD: Vietsub" />
+                            </td>
+
+                            <td>
+                                <input type="checkbox" name="Showtimes[0].IsActive" value="true" />
+                                <input type="hidden" name="Showtimes[0].IsActive" value="false" />
+                            </td>
+
+                            <td>
+                                <button type="button" class="btn btn-delete btn-sm removeRow">✖</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
-            <!-- Cột phải -->
-            <div class="col-md-6">
-
-                <div class="mb-3">
-                    <label class="form-label">Rạp</label>
-                    <select class="form-select" asp-for="AuditoriumId">
-                        @foreach (var r in auditoriums)
-                        {
-                            <option value="@r.AuditoriumId">@r.Name</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Ngày giờ kết thúc</label>
-                    <input type="datetime-local" class="form-control" asp-for="EndTime" />
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Ngôn ngữ</label>
-                    <input type="text" class="form-control" asp-for="Language" />
-                </div>
-
+            <div class="mt-3 d-flex gap-2">
+                <button type="button" id="addRow" class="btn btn-add btn-custom">
+                    ➕ Thêm dòng
+                </button>
             </div>
-        </div>
 
-        <div class="mt-3">
-            <button type="submit" class="btn btn-success">💾 Lưu</button>
-            <a asp-action="Index" class="btn btn-secondary">⬅ Quay lại</a>
-        </div>
+            <hr />
 
-    </form>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-save btn-custom">
+                    💾 Lưu tất cả
+                </button>
+
+                <a asp-action="Index" class="btn btn-back btn-custom">
+                    ⬅ Quay lại
+                </a>
+            </div>
+
+        </form>
+    </div>
 </div>
+<script>
+    let index = 1;
+
+    document.getElementById("addRow").addEventListener("click", function () {
+
+        let table = document.querySelector("#showtimeTable tbody");
+
+        let newRow = `
+        <tr>
+            <td>
+                <select name="Showtimes[${index}].MovieId" class="form-select">
+                    ${getMovies()}
+                </select>
+            </td>
+
+            <td>
+                <select name="Showtimes[${index}].AuditoriumId" class="form-select">
+                    ${getAuditoriums()}
+                </select>
+            </td>
+
+            <td><input type="datetime-local" name="Showtimes[${index}].StartTime" class="form-control" /></td>
+            <td><input type="datetime-local" name="Showtimes[${index}].EndTime" class="form-control" /></td>
+            <td><input type="number" name="Showtimes[${index}].BasePrice" class="form-control" /></td>
+            <td><input type="text" name="Showtimes[${index}].Language" class="form-control" /></td>
+
+            <td>
+                <input type="checkbox" name="Showtimes[${index}].IsActive" value="true" />
+                <input type="hidden" name="Showtimes[${index}].IsActive" value="false" />
+            </td>
+
+            <td>
+                <button type="button" class="btn btn-danger btn-sm removeRow">❌</button>
+            </td>
+        </tr>
+        `;
+
+        table.insertAdjacentHTML('beforeend', newRow);
+        index++;
+    });
+
+    document.addEventListener("click", function (e) {
+        if (e.target.classList.contains("removeRow")) {
+            e.target.closest("tr").remove();
+        }
+    });
+
+    function getMovies() {
+        return `@foreach (var m in movies)
+        {
+            <option value="@m.MovieId">@m.Title</option>
+        }`;
+    }
+
+    function getAuditoriums() {
+        return `@foreach (var r in auditoriums)
+        {
+            <option value="@r.AuditoriumId">@r.Name</option>
+        }`;
+    }
+</script>
+<style>
+    .card-custom {
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        padding: 20px;
+        background: #fff;
+    }
+
+    .table thead {
+        background: linear-gradient(135deg, #1d2b64, #f8cdda);
+        color: white;
+    }
+
+    .table tbody tr {
+        transition: 0.2s;
+    }
+
+    .table tbody tr:hover {
+        background: #f5f7fa;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 8px 12px;
+    }
+
+    .btn-custom {
+        border-radius: 10px;
+        padding: 8px 16px;
+        font-weight: 500;
+    }
+
+    .btn-add {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .btn-save {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+        color: white;
+    }
+
+    .btn-back {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-delete {
+        background: #ff4d4f;
+        color: white;
+    }
+
+    .title-icon {
+        font-size: 26px;
+        color: #6a5acd;
+        margin-right: 10px;
+    }
+</style>

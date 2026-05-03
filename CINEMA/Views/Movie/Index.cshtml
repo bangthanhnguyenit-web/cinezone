@@ -5,22 +5,16 @@
 
     var today = DateTime.Today;
 
-    // 🎬 Phim đang chiếu
     var nowShowing = Model?
-        .Where(m =>
-            m.IsActive == true &&
-            m.ReleaseDate.HasValue &&
-            m.ReleaseDate.Value.ToDateTime(TimeOnly.MinValue) <= today)
+        .Where(m => m.IsActive == true && m.ReleaseDate.HasValue &&
+               m.ReleaseDate.Value.ToDateTime(TimeOnly.MinValue) <= today)
         .ToList() ?? new();
 
-    // 🚀 Phim sắp chiếu
     var comingSoon = Model?
-        .Where(m =>
-            m.ReleaseDate.HasValue &&
-            m.ReleaseDate.Value.ToDateTime(TimeOnly.MinValue) > today)
+        .Where(m => m.ReleaseDate.HasValue &&
+               m.ReleaseDate.Value.ToDateTime(TimeOnly.MinValue) > today)
         .ToList() ?? new();
 
-    // 🛑 Phim ngừng chiếu
     var stopped = Model?
         .Where(m => m.IsActive == false)
         .ToList() ?? new();
@@ -28,108 +22,128 @@
 
 <div class="container-fluid py-4">
 
-    <!-- Header -->
+    <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-primary mb-0">
-            <i class="bi bi-film me-2"></i> Quản lý phim
-        </h2>
-        <a asp-action="Create" class="btn btn-success btn-lg shadow-sm">
-            <i class="bi bi-plus-circle me-2"></i> Thêm phim mới
+        <div>
+            <h2 class="fw-bold text-dark mb-0">🎬 Quản lý phim</h2>
+            <small class="text-muted">Quản lý toàn bộ phim</small>
+        </div>
+
+        <a asp-action="Create" class="btn btn-success shadow-sm px-4">
+            <i class="bi bi-plus-circle me-2"></i> Thêm phim
         </a>
     </div>
 
-    <!-- Thông báo -->
+    <!-- STATS -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 p-3">
+                <h5 class="text-success">@nowShowing.Count</h5>
+                <small class="text-muted">Đang chiếu</small>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 p-3">
+                <h5 class="text-warning">@comingSoon.Count</h5>
+                <small class="text-muted">Sắp chiếu</small>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 rounded-4 p-3">
+                <h5 class="text-danger">@stopped.Count</h5>
+                <small class="text-muted">Ngừng chiếu</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
     @if (TempData["SuccessMessage"] != null)
     {
-        <div class="alert alert-success fw-semibold shadow-sm">
-            @TempData["SuccessMessage"]
-        </div>
-    }
-
-    <!-- ======================================= -->
-    <!-- 🎬 PHIM ĐANG CHIẾU -->
-    <!-- ======================================= -->
-    <div class="card shadow-sm border-0 mb-5">
-        <div class="card-header bg-dark text-white fw-semibold">
-            🎬 Phim đang chiếu
-        </div>
-        <div class="card-body p-0">
-            @Html.Partial("_MovieTable", nowShowing)
-        </div>
-    </div>
-
-    <!-- ======================================= -->
-    <!-- 🚀 PHIM SẮP CHIẾU -->
-    <!-- ======================================= -->
-    <div class="card shadow-sm border-0 mb-5">
-        <div class="card-header bg-secondary text-white fw-semibold">
-            🚀 Phim sắp chiếu
-        </div>
-        <div class="card-body p-0">
-            @Html.Partial("_MovieTableComingSoon", comingSoon)
-        </div>
-    </div>
-
-    <!-- ======================================= -->
-    <!-- 🛑 PHIM NGỪNG CHIẾU -->
-    <!-- ======================================= -->
-    <div class="card shadow-sm border-0 mb-5">
-        <div class="card-header bg-danger text-white fw-semibold">
-            🛑 Phim ngừng chiếu
-        </div>
-        <div class="card-body p-0">
-            @Html.Partial("_MovieTableStopped", stopped)
-        </div>
-    </div>
-</div>
-
-<!-- Modal trailer -->
-<div class="modal fade" id="trailerModal" tabindex="-1" aria-labelledby="trailerLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 rounded-4 overflow-hidden">
-            <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title" id="trailerLabel">🎞 Trailer phim</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-0">
-                <div class="ratio ratio-16x9">
-                    <iframe id="trailerFrame" src="" allowfullscreen class="border-0"></iframe>
+        <div class="toast-container position-fixed top-0 end-0 p-4" style="z-index:9999;">
+            <div id="successToast" class="toast show text-bg-success border-0 shadow-lg rounded-4">
+                <div class="d-flex align-items-center p-3">
+                    <i class="bi bi-check-circle-fill fs-4 me-2"></i>
+                    <div class="fw-semibold">
+                        @TempData["SuccessMessage"]
+                    </div>
+                    <button class="btn-close btn-close-white ms-auto" data-bs-dismiss="toast"></button>
                 </div>
             </div>
         </div>
+    }
+
+    <!-- ================= PHIM ĐANG CHIẾU ================= -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-success text-white fw-semibold d-flex justify-content-between">
+            🎬 Phim đang chiếu
+            <span class="badge bg-light text-dark">@nowShowing.Count</span>
+        </div>
+
+        <div class="card-body p-0">
+            @if (nowShowing.Count == 0)
+            {
+                <div class="text-center py-4 text-muted">Không có dữ liệu</div>
+            }
+            else
+            {
+                @Html.Partial("_MovieTable", nowShowing)
+            }
+        </div>
     </div>
+
+    <!-- ================= PHIM SẮP CHIẾU ================= -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-warning text-dark fw-semibold d-flex justify-content-between">
+            🚀 Phim sắp chiếu
+            <span class="badge bg-light text-dark">@comingSoon.Count</span>
+        </div>
+
+        <div class="card-body p-0">
+            @if (comingSoon.Count == 0)
+            {
+                <div class="text-center py-4 text-muted">Không có dữ liệu</div>
+            }
+            else
+            {
+                @Html.Partial("_MovieTableComingSoon", comingSoon)
+            }
+        </div>
+    </div>
+
+    <!-- ================= PHIM NGỪNG CHIẾU ================= -->
+    <div class="card shadow-sm border-0 rounded-4 mb-4">
+        <div class="card-header bg-danger text-white fw-semibold d-flex justify-content-between">
+            🛑 Phim ngừng chiếu
+            <span class="badge bg-light text-dark">@stopped.Count</span>
+        </div>
+
+        <div class="card-body p-0">
+            @if (stopped.Count == 0)
+            {
+                <div class="text-center py-4 text-muted">Không có dữ liệu</div>
+            }
+            else
+            {
+                @Html.Partial("_MovieTableStopped", stopped)
+            }
+        </div>
+    </div>
+
 </div>
 
 @section Scripts {
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-
-            const modal = document.getElementById('trailerModal');
-            const frame = document.getElementById('trailerFrame');
-
-            modal.addEventListener('show.bs.modal', function (event) {
-                const btn = event.relatedTarget;
-                const url = btn.getAttribute('data-trailer');
-                let embed = "";
-
-                if (url.includes("youtube")) {
-                    let id = "";
-                    if (url.includes("v="))
-                        id = url.split("v=")[1].split("&")[0];
-                    else if (url.includes("youtu.be/"))
-                        id = url.split("youtu.be/")[1].split("?")[0];
-
-                    embed = `https://www.youtube.com/embed/${id}?autoplay=1`;
-                } else {
-                    embed = url;
-                }
-
-                frame.src = embed;
-            });
-
-            modal.addEventListener('hidden.bs.modal', function () {
-                frame.src = "";
-            });
+        document.addEventListener("DOMContentLoaded", function () {
+            const toast = document.getElementById("successToast");
+            if (toast) {
+                setTimeout(() => {
+                    toast.style.opacity = "0";
+                    toast.style.transform = "translateX(50px)";
+                    setTimeout(() => toast.remove(), 400);
+                }, 5000);
+            }
         });
     </script>
 }

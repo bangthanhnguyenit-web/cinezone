@@ -153,3 +153,23 @@ footer {
     .close-popup:hover {
         background: #c60000;
     }
+/* popup button */
+.popup-btn {
+    border-radius: 30px;
+    transition: all 0.3s ease;
+}
+
+    .popup-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+/* popup animation */
+.modal.fade .modal-dialog {
+    transform: scale(0.9);
+    transition: all .3s ease;
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
+}

@@ -237,8 +237,35 @@ namespace CINEMA.Controllers
                 model.MovieLabels.Add(mv.MovieTitle);
                 model.RevenueByMovie.Add(mv.Revenue);
             }
+            // =====================================================
+            // 🔥 THỐNG KÊ SỐ LƯỢNG ĐƠN
+            // =====================================================
 
+            var allOrders = _context.Orders.AsQueryable();
+
+            // lọc theo ngày giống paidOrders
+            if (from.HasValue)
+                allOrders = allOrders.Where(o => o.CreatedAt >= from.Value.Date);
+
+            if (to.HasValue)
+            {
+                var toEnd = to.Value.Date.AddDays(1).AddTicks(-1);
+                allOrders = allOrders.Where(o => o.CreatedAt <= toEnd);
+            }
+
+            // 🔥 COUNT
+            model.PaidOrders = await allOrders.CountAsync(o =>
+                o.Status != null && o.Status.ToLower().Contains("thanh toán"));
+
+            model.PendingOrders = await allOrders.CountAsync(o =>
+                o.Status != null && o.Status.ToLower().Contains("chờ"));
+
+            model.CancelledOrders = await allOrders.CountAsync(o =>
+                o.Status != null &&
+                (o.Status.ToLower().Contains("hủy") ||
+                 o.Status.ToLower().Contains("thất bại")));
             return model;
         }
+      
     }
 }

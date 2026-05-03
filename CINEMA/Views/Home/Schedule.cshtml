@@ -101,30 +101,61 @@
                                             .OrderBy(s => s.StartTime)
                                             .ToList();
                                         }
+                                        @{
+                                            var showtimesByTheater = movie.Showtimes
+                                                .Where(s => s.StartTime.HasValue &&
+                                                            s.StartTime.Value.Date == selectedDate.Date &&
+                                                            s.IsActive == true)
+                                                .GroupBy(s => s.Auditorium.Theater);
+                                        }
 
-                                        @if (showtimes.Any())
+                                        @if (showtimesByTheater.Any())
                                         {
-                                            <div class="d-flex flex-wrap gap-3">
-                                                @foreach (var s in showtimes)
-                                                {
-                                                    <a asp-controller="Home"
-                                                       asp-action="BookTicket"
-                                                       asp-route-id="@movie.MovieId"
-                                                       asp-route-showtimeId="@s.ShowtimeId"
-                                                       class="btn-showtime shadow-sm text-decoration-none">
-                                                        <div class="fw-bold fs-5">@s.StartTime?.ToString("HH:mm")</div>
-                                                        <div class="text-muted small">@s.Auditorium?.Name</div>
-                                                        <div class="text-danger fw-semibold mt-1">
-                                                            @((s.BasePrice ?? 0).ToString("N0")) đ
-                                                        </div>
-                                                    </a>
-                                                }
-                                            </div>
+                                            @foreach (var theaterGroup in showtimesByTheater)
+                                            {
+                                                <div class="mb-3">
+                                                    <!-- 🎯 TÊN RẠP -->
+                                                    <h6 class="fw-bold text-primary mb-1">
+                                                        <i class="bi bi-geo-alt-fill me-1"></i>
+                                                        @theaterGroup.Key.Name
+                                                    </h6>
+
+                                                    <small class="text-muted d-block mb-2">
+                                                        @theaterGroup.Key.Address
+                                                    </small>
+
+                                                    <!-- 🎬 SUẤT CHIẾU -->
+                                                    <div class="d-flex flex-wrap gap-3">
+                                                        @foreach (var s in theaterGroup.OrderBy(x => x.StartTime))
+                                                        {
+                                                            <a asp-controller="Home"
+                                                                   asp-action="BookTicket"
+                                                                   asp-route-id="@movie.MovieId"
+                                                                   asp-route-showtimeId="@s.ShowtimeId"
+                                                                   class="btn-showtime shadow-sm text-decoration-none">
+
+                                                                <div class="fw-bold fs-5">
+                                                                    @s.StartTime?.ToString("HH:mm")
+                                                                </div>
+
+                                                                <div class="text-muted small">
+                                                                    @s.Auditorium?.Name
+                                                                </div>
+
+                                                                <div class="text-danger fw-semibold mt-1">
+                                                                    @((s.BasePrice ?? 0).ToString("N0")) đ
+                                                                </div>
+                                                            </a>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            }
                                         }
                                         else
                                         {
                                             <p class="text-muted mb-0">
-                                                <i class="bi bi-info-circle me-2"></i>Chưa có suất chiếu cho ngày này.
+                                                <i class="bi bi-info-circle me-2"></i>
+                                                Chưa có suất chiếu cho ngày này.
                                             </p>
                                         }
                                     </div>
@@ -191,4 +222,9 @@
             .btn-showtime:hover .text-muted {
                 color: #e0e0e0 !important;
             }
+
+    .theater-block {
+        padding: 10px 0;
+        border-bottom: 1px dashed #ccc;
+    }
 </style>

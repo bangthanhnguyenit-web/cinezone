@@ -1,0 +1,84 @@
+﻿@model List<CINEMA.Models.Voucher>
+
+@{
+    ViewData["Title"] = "Voucher";
+    Layout = "_AdminLayout";
+}
+
+<h2 class="mb-3">🎟️ Quản lý Voucher</h2>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+<a href="/AdminVoucher/Create" class="btn btn-success mb-3">
+    + Tạo voucher
+</a>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Mã</th>
+            <th>% Giảm</th>
+            <th>Giảm tiền</th>
+            <th>Đơn tối thiểu</th>
+
+            <!-- 🔥 THÊM -->
+            <th>Bắt đầu</th>
+            <th>Kết thúc</th>
+
+            <th>Số lượng</th>
+            <th>Đã dùng</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var v in Model)
+        {
+            <tr>
+                <td>@v.Code</td>
+                <td>@v.DiscountPercent</td>
+                <td>@v.DiscountAmount</td>
+                <td>@v.MinOrderValue</td>
+
+                <!-- 🔥 HIỂN THỊ NGÀY -->
+                <td>@v.StartDate?.ToString("dd/MM/yyyy")</td>
+                <td>@v.EndDate?.ToString("dd/MM/yyyy")</td>
+
+                <td>@v.Quantity</td>
+                <td>@v.UsedCount</td>
+
+                <!-- 🔥 TRẠNG THÁI THÔNG MINH -->
+                <td>
+                    @if (!v.IsActive)
+                    {
+                        <span class="text-secondary">Tắt</span>
+                    }
+                    else if (v.StartDate > DateTime.Now)
+                    {
+                        <span class="text-warning">Chưa bắt đầu</span>
+                    }
+                    else if (v.EndDate < DateTime.Now)
+                    {
+                        <span class="text-danger">Hết hạn</span>
+                    }
+                    else
+                    {
+                        <span class="text-success">Hoạt động</span>
+                    }
+                </td>
+
+                <td>
+                    <a href="/AdminVoucher/Edit/@v.VoucherId" class="btn btn-warning btn-sm">Sửa</a>
+                    <a href="/AdminVoucher/Delete/@v.VoucherId"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Xóa voucher này?')">
+                        Xóa
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

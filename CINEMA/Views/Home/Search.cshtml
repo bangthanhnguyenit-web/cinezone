@@ -1,0 +1,46 @@
+﻿@model IEnumerable<CINEMA.Models.Movie>
+
+<div class="container mt-4">
+
+    <h3 class="mb-4">
+        🔍 Kết quả tìm kiếm cho: "@ViewBag.Keyword"
+    </h3>
+
+    <div class="row g-4">
+
+        @if (!Model.Any())
+        {
+            <p class="text-danger">
+                ❌ Không tìm thấy phim đang chiếu phù hợp
+            </p>
+        }
+
+        @foreach (var movie in Model)
+        {
+            <div class="col-md-3">
+
+                <div class="card shadow-sm h-100">
+
+                    <img src="@movie.PosterUrl" class="card-img-top">
+
+                    <div class="card-body text-center">
+
+                        <h5>@movie.Title</h5>
+
+                        <a asp-action="BookTicket"
+                               asp-route-id="@movie.MovieId"
+                               class="btn btn-warning mt-2">
+
+                            🎟 Đặt vé
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>

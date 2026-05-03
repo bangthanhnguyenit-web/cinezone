@@ -4,20 +4,214 @@
 }
 
 <div class="container mt-4">
-    <h2><i class="bi bi-person-badge"></i> Hồ sơ cá nhân</h2>
-    <div class="card shadow-sm mt-3">
-        <div class="card-body">
-            <p><strong>Họ và tên:</strong> @Model.FullName</p>
-            <p><strong>Email:</strong> @Model.Email</p>
-            <p><strong>Số điện thoại:</strong> @Model.Phone</p>
-            <p><strong>Ngày tạo:</strong> @Model.CreatedAt?.ToString("dd/MM/yyyy")</p>
-            <p><strong>Lần đăng nhập gần nhất:</strong> @Model.LastLogin?.ToString("dd/MM/yyyy HH:mm")</p>
+
+    <div class="profile-card p-4 text-center">
+
+        <!-- Avatar -->
+        <img src="@(string.IsNullOrEmpty(Model.Avatar) ? "/images/default-avatar.png" : Model.Avatar)"
+             class="avatar mb-3" />
+
+        <h3 class="fw-bold">@Model.FullName</h3>
+        <p class="text-muted">@Model.Email</p>
+
+        <!-- 🎯 Membership -->
+        <button class="membership-badge
+            @(Model.MembershipLevel == "Kim cương" ? "diamond" :
+                              Model.MembershipLevel == "Bạc" ? "silver" : "bronze")"
+                data-bs-toggle="modal"
+                data-bs-target="#modalMembership">
+            @Model.MembershipLevel
+        </button>
+
+        <!-- 💰 Total -->
+        <div class="mt-4">
+            <p class="text-muted mb-1">Tổng chi tiêu</p>
+            <h2 class="fw-bold text-danger">@Model.TotalSpent.ToString("N0") đ</h2>
+        </div>
+
+        <!-- 🚀 Progress -->
+        <div class="mt-3">
+            <div class="progress rounded-pill">
+                <div class="progress-bar progress-custom"
+                     style="width:@Model.ProgressPercent%">
+                    @Model.ProgressPercent%
+                </div>
+            </div>
+
+            <small class="text-muted d-block mt-2">
+                @if (Model.MembershipLevel != "Kim cương")
+                {
+                    @:Còn <b>@Model.NextLevelAmount.ToString("N0") đ</b> để lên hạng 🚀
+                }
+                else
+                {
+                    @:🎉 Bạn đã đạt hạng cao nhất!
+                }
+            </small>
+        </div>
+
+        <!-- 🏆 Tier -->
+        <div class="mt-5">
+            <h5 class="fw-bold mb-3">🏆 Hạng thành viên</h5>
+
+            <div class="tier-wrapper">
+
+                <div class="tier @(Model.MembershipLevel == "Đồng" ? "active" : "")"
+                     data-bs-toggle="modal" data-bs-target="#modalDong">
+                    🥉 Đồng
+                    <small>0 - 3tr</small>
+                </div>
+
+                <div class="tier @(Model.MembershipLevel == "Bạc" ? "active" : "")"
+                     data-bs-toggle="modal" data-bs-target="#modalBac">
+                    🥈 Bạc
+                    <small>3tr - 10tr</small>
+                </div>
+
+                <div class="tier @(Model.MembershipLevel == "Kim cương" ? "active" : "")"
+                     data-bs-toggle="modal" data-bs-target="#modalKimCuong">
+                    💎 Kim cương
+                    <small>> 10tr</small>
+                </div>
+
+            </div>
+        </div>
+
+        <hr class="my-4" />
+
+        <!-- 📋 Info -->
+        <div class="row text-start small">
+            <div class="col-md-6 mb-2">📞 <b>@Model.Phone</b></div>
+            <div class="col-md-6 mb-2">📅 @Model.CreatedAt?.ToString("dd/MM/yyyy")</div>
+            <div class="col-md-6 mb-2">⏱ @Model.LastLogin?.ToString("dd/MM/yyyy HH:mm")</div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="mt-4 d-flex justify-content-center gap-2">
+            <a asp-action="EditProfile" class="btn btn-primary">✏️ Chỉnh sửa</a>
+            <a asp-controller="Customer" asp-action="Logout" class="btn btn-outline-danger">Đăng xuất</a>
+        </div>
+
+    </div>
+</div>
+<style>
+.profile-card {
+    background:#fff;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.1);
+}
+
+.avatar {
+    width:120px;height:120px;
+    border-radius:50%;
+    object-fit:cover;
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
+}
+
+.membership-badge {
+    border:none;
+    padding:10px 20px;
+    border-radius:20px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.2s;
+}
+.membership-badge:hover { transform:scale(1.1); }
+
+.bronze { background:#ffcc80; }
+.silver { background:#cfd8dc; }
+.diamond { background:#90caf9; }
+
+.progress { height:20px; }
+.progress-custom {
+    background:linear-gradient(90deg,#00c6ff,#0072ff);
+}
+
+.tier-wrapper {
+    display:flex;
+    gap:10px;
+}
+
+.tier {
+    flex:1;
+    padding:12px;
+    border-radius:12px;
+    background:#f5f5f5;
+    cursor:pointer;
+    transition:0.3s;
+}
+.tier:hover { transform:translateY(-3px); }
+
+.tier.active {
+    background:linear-gradient(135deg,#00c6ff,#0072ff);
+    color:white;
+    transform:scale(1.05);
+}
+
+.tier small {
+    display:block;
+    font-size:12px;
+}
+</style>
+
+
+<div class="modal fade" id="modalDong" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0" style="background: #e67e22; color: white;">
+                <h5 class="modal-title fw-bold">🥉 ĐẶC QUYỀN HẠNG ĐỒNG</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <ul class="list-unstyled">
+                    <li class="mb-3"><i class="bi bi-star-fill text-warning me-2"></i> <b>Tích điểm:</b> Tích lũy 3% giá trị hóa đơn.</li>
+                    <li class="mb-3"><i class="bi bi-gift-fill text-danger me-2"></i> <b>Quà sinh nhật:</b> Tặng 1 combo bắp nước miễn phí.</li>
+                    <li class="mb-3"><i class="bi bi-lightning-charge-fill text-primary me-2"></i> <b>Ưu đãi:</b> Nhận tin tức sớm nhất về các phim bom tấn và suất chiếu sớm.</li>
+                    <li><i class="bi bi-check-circle-fill text-success me-2"></i> <b>Đặt vé:</b> Đặt vé trực tuyến nhanh chóng, không chờ đợi.</li>
+                </ul>
+            </div>
         </div>
     </div>
+</div>
 
-    <div class="mt-3">
-        <a asp-controller="Customer" asp-action="Logout" class="btn btn-danger">
-            <i class="bi bi-box-arrow-right"></i> Đăng xuất
-        </a>
+<!-- Bạc -->
+<div class="modal fade" id="modalBac" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0" style="background: #95a5a6; color: white;">
+                <h5 class="modal-title fw-bold">🥈 ĐẶC QUYỀN HẠNG BẠC</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted small italic">Bao gồm tất cả quyền lợi hạng Đồng và thêm:</p>
+                <ul class="list-unstyled">
+                    <li class="mb-3"><i class="bi bi-star-fill text-warning me-2"></i> <b>Tích điểm:</b> Tích lũy 7% giá trị hóa đơn (Gấp đôi hạng Đồng).</li>
+                    <li class="mb-3"><i class="bi bi-ticket-perforated-fill text-danger me-2"></i> <b>Quà sinh nhật:</b> Tặng 01 cặp vé xem phim 2D miễn phí.</li>
+                    <li class="mb-3"><i class="bi bi-percent text-success me-2"></i> <b>Happy Day:</b> Giảm thêm 10% bắp nước vào thứ 3 hàng tuần.</li>
+                    <li><i class="bi bi-award-fill text-primary me-2"></i> <b>Quà tặng độc quyền:</b> Ưu tiên đổi điểm nhận các vật phẩm phim (ly, túi, mô hình).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Kim cương -->
+<div class="modal fade" id="modalKimCuong" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-0" style="background: linear-gradient(135deg, #3498db, #2c3e50); color: white;">
+                <h5 class="modal-title fw-bold">💎 ĐẶC QUYỀN KIM CƯƠNG</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-primary fw-bold">Hạng thành viên cao quý nhất</p>
+                <ul class="list-unstyled">
+                    <li class="mb-3"><i class="bi bi-star-fill text-warning me-2"></i> <b>Tích điểm:</b> Tích lũy tối đa 10% giá trị hóa đơn.</li>
+                    <li class="mb-3"><i class="bi bi-gem text-info me-2"></i> <b>Quà sinh nhật VIP:</b> Combo 2 vé giường nằm/VIP + Suất ăn nhẹ tại rạp.</li>
+                    <li class="mb-3"><i class="bi bi-person-workspace text-danger me-2"></i> <b>Phục vụ ưu tiên:</b> Quầy check-in riêng, không cần xếp hàng.</li>
+                    <li class="mb-3"><i class="bi bi-arrow-up-circle-fill text-success me-2"></i> <b>Nâng cấp miễn phí:</b> Nâng cấp lên ghế VIP miễn phí nếu rạp còn trống.</li>
+                    <li><i class="bi bi-calendar-event-fill text-warning me-2"></i> <b>Sự kiện:</b> Vé mời tham gia các buổi Premiere ra mắt phim cùng nghệ sĩ.</li>
+                </ul>
+            </div>
+        </div>
     </div>
 </div>

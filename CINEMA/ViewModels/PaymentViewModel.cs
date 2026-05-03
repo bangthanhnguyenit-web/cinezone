@@ -50,5 +50,6 @@ namespace CINEMA.ViewModels
         public string PaymentMethod { get; set; }
         public string PaymentImageUrl { get; set; }
         public decimal TicketTotal { get; set; }
+        public string VoucherCode { get; set; }
     }
 }

@@ -15,7 +15,7 @@
             <i class="bi bi-ticket-perforated-fill text-danger me-2"></i>
             Đặt vé xem phim
         </h2>
-        <p class="text-muted mb-0">Chọn vé, ghế và combo của bạn</p>
+        <p class="text-muted mb-0">Chọn , ghế và combo của bạn</p>
     </div>
 
     <!-- 🎬 Thông tin phim -->
@@ -57,24 +57,67 @@
                     <!-- 🕒 Danh sách suất chiếu -->
                     @if (showtimes.Any())
                     {
-                        <div class="bg-white border rounded p-3 mt-3">
-                            <h6 class="fw-bold text-primary mb-2">
-                                <i class="bi bi-calendar-event me-2"></i>Chọn suất chiếu
-                            </h6>
-                            <div class="d-flex flex-wrap gap-2">
-                                @foreach (var s in showtimes)
-                                {
-                                    bool isActive = showtime != null && s.ShowtimeId == showtime.ShowtimeId;
-                                    <a asp-controller="Home"
-                                       asp-action="BookTicket"
-                                       asp-route-id="@Model.MovieId"
-                                       asp-route-showtimeId="@s.ShowtimeId"
-                                       class="showtime-btn @(isActive ? "active" : "")">
-                                        <span>@s.StartTime?.ToString("dd/MM")</span>
-                                        <strong>@s.StartTime?.ToString("HH:mm")</strong>
-                                    </a>
-                                }
-                            </div>
+                        <div class="border-top pt-4">
+                            <h5 class="fw-semibold mb-3 text-secondary">
+                                <i class="bi bi-calendar-event me-2"></i>Suất chiếu trong ngày
+                            </h5>
+
+                            @{
+                                var showtimesByTheater = showtimes
+                                    .Where(s => s.Auditorium?.Theater != null)
+                                    .GroupBy(s => s.Auditorium.Theater);
+                            }
+
+                            @foreach (var theaterGroup in showtimesByTheater)
+                            {
+                                <div class="mb-4">
+
+                                    <!-- 📍 TÊN RẠP -->
+                                    <h6 class="fw-bold text-primary mb-1">
+                                        <i class="bi bi-geo-alt-fill me-1"></i>
+                                        @theaterGroup.Key.Name
+                                    </h6>
+
+                                    <!-- 📍 ĐỊA CHỈ -->
+                                    <p class="text-muted mb-2">
+                                        @theaterGroup.Key.Address
+                                    </p>
+
+                                    <!-- 🎬 SUẤT CHIẾU -->
+                                    <div class="d-flex flex-wrap gap-3">
+                                        @foreach (var s in theaterGroup.OrderBy(x => x.StartTime))
+                                        {
+                                            bool isActive = showtime != null && s.ShowtimeId == showtime.ShowtimeId;
+
+                                            <a asp-controller="Home"
+                                                   asp-action="BookTicket"
+                                                   asp-route-id="@Model.MovieId"
+                                                   asp-route-showtimeId="@s.ShowtimeId"
+                                                   class="showtime-card @(isActive ? "active" : "")">
+
+                                                <div class="fw-bold fs-5 text-primary">
+                                                    @s.StartTime?.ToString("HH:mm")
+                                                </div>
+
+                                                <div class="text-muted small">
+                                                    @s.Auditorium?.Name
+                                                </div>
+
+                                                <div class="text-danger fw-semibold">
+                                                    @((s.BasePrice ?? 0).ToString("N0")) đ
+                                                </div>
+                                            </a>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning mt-3">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Hiện tại phim này chưa có suất chiếu
                         </div>
                     }
 
@@ -104,12 +147,13 @@
     </div>
 
     <!-- 🧾 Form đặt vé -->
-    <form asp-controller="Payment" asp-action="Index" method="post">
+    <form asp-controller="Payment" asp-action="Index" method="post" onsubmit="return validateForm()">
+        <input type="hidden" id="selectedSeats" name="selectedSeats" />
         <input type="hidden" name="MovieId" value="@Model.MovieId" />
         <input type="hidden" name="ShowtimeId" value="@showtime?.ShowtimeId" />
         <input type="hidden" id="basePrice" name="BasePrice" value="@basePrice" />
         <input type="hidden" id="TotalPriceHidden" name="TotalPrice" value="0" />
-
+        <input type="hidden" name="VoucherCode" id="voucherCodeHidden" />
         <!-- 🎫 Chọn loại vé -->
         <div class="card mb-4 shadow-sm border-0">
             <div class="card-header bg-white fw-bold">
@@ -164,16 +208,16 @@
                             @:<span class="badge bg-secondary me-2">@currentRow</span>
                         }
 
-                        <label class="m-1" style="cursor:pointer;">
-                            <input type="checkbox"
-                                   class="seat-checkbox d-none"
-                                   name="Seats"
-                                   value="@seatCode"
-                                   @(isBooked ? "disabled" : "") />
-                            <span class="badge px-3 py-2 seat-badge @(isBooked ? "bg-danger" : "bg-secondary")">
-                                @seat.SeatNumber
-                            </span>
-                        </label>
+                    <label class="m-1 @(isBooked ? "disabled-seat" : "")">
+                        <input type="checkbox"
+                               class="seat-checkbox"
+                               value="@seatCode"
+                        @(isBooked ? "disabled" : "") />
+
+                        <span class="badge px-3 py-2 seat-badge @(isBooked ? "bg-danger" : "bg-secondary")">
+                            @seat.SeatNumber
+                        </span>
+                    </label>
                     }
                     @if (!string.IsNullOrEmpty(currentRow))
                     {
@@ -227,7 +271,17 @@
                 }
             </div>
         </div>
-
+<!-- 🎟️ Voucher -->
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-header bg-white fw-bold">
+        <i class="bi bi-gift text-success me-2"></i> Mã giảm giá
+    </div>
+    <div class="card-body d-flex gap-2">
+        <input type="text" id="voucherCode" class="form-control" placeholder="Nhập mã voucher..." />
+        <button type="button" class="btn btn-success" onclick="applyVoucher()">Áp dụng</button>
+    </div>
+    <div id="voucherMessage" class="px-3 pb-3 text-success fw-semibold"></div>
+</div>
         <!-- 💳 Tổng tiền -->
         <div class="card shadow border-0 sticky-bottom">
             <div class="card-body d-flex justify-content-between align-items-center">
@@ -240,6 +294,16 @@
                 </button>
             </div>
         </div>
+<div class="card shadow border-0 sticky-bottom">
+    <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-1">
+                <strong>Lưu ý:</strong> Vé không được hoàn trả sau khi xác nhận thanh toán với bất kỳ lý do nào. Vui lòng kiểm tra kỹ thông tin trước khi đặt vé.
+            </h5>
+        </div>
+    </div>
+</div>
+
     </form>
 </div>
 
@@ -273,26 +337,130 @@
     color: white;
     box-shadow: 0 0 10px rgba(13,110,253,0.6);
 }
+    .showtime-card {
+        width: 110px;
+        padding: 12px;
+        border-radius: 12px;
+        border: 2px solid #0d6efd;
+        text-align: center;
+        text-decoration: none;
+        color: #0d6efd;
+        background: white;
+        transition: all 0.2s ease;
+    }
+
+        /* Hover nhẹ nhàng hơn */
+        .showtime-card:hover {
+            background: #e7f1ff;
+            color: #0d6efd;
+            transform: translateY(-2px);
+        }
+
+        /* Active đẹp hơn (không chói) */
+        .showtime-card.active {
+            background: #f0f8ff;
+            color: white;
+        }
+
+            /* 🔥 FIX chữ bên trong */
+            .showtime-card.active .text-muted {
+                color: #e0e0e0 !important;
+            }
+
+            .showtime-card.active .text-danger {
+                color: #ffd6d6 !important;
+            }
+    .disabled-seat {
+        pointer-events: none;
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+    .seat-checkbox {
+        display: none;
+    }
 </style>
 @section Scripts {
     <script>
+              let discount = 0; // 🔥 luôn ở trên cùng
+
         function calcTotal() {
             const basePrice = parseFloat(document.getElementById("basePrice").value) || 0;
+
             let adult = parseInt(document.getElementsByName("AdultTickets")[0].value) || 0;
             let child = parseInt(document.getElementsByName("ChildTickets")[0].value) || 0;
             let student = parseInt(document.getElementsByName("StudentTickets")[0].value) || 0;
-            let total = adult * basePrice + child * (basePrice * 0.7) + student * (basePrice * 0.8);
 
+            let total = adult * basePrice
+                + child * (basePrice * 0.7)
+                + student * (basePrice * 0.8);
+
+            // combo
             document.querySelectorAll(".combo-input").forEach(el => {
                 let qty = parseInt(el.value) || 0;
                 let price = parseFloat(el.dataset.price) || 0;
                 total += qty * price;
             });
 
+            // 🎟️ voucher
+            if (discount > 0) {
+                if (discount < 1) {
+                    total = total - total * discount;
+                } else {
+                    total = total - discount;
+                }
+            }
+
+            if (total < 0) total = 0;
+
             document.getElementById("totalPrice").innerText = total.toLocaleString("vi-VN");
             document.getElementById("TotalPriceHidden").value = total;
         }
 
+        // ================= VOUCHER =================
+                   async function applyVoucher() {
+            const code = document.getElementById("voucherCode").value.trim();
+            const message = document.getElementById("voucherMessage");
+
+            if (!code) {
+                message.innerText = "❌ Nhập mã voucher";
+                message.className = "text-danger";
+                return;
+            }
+            calcTotal();
+
+            let total = parseFloat(document.getElementById("TotalPriceHidden").value) || 0;
+
+            try {
+                let res = await fetch(`/Home/CheckVoucher?code=${code}&total=${total}`);
+                let data = await res.json();
+
+                if (!data.success) {
+                    message.innerText = "❌ " + data.message;
+                    message.className = "text-danger";
+                    return;
+                }
+
+                // 🔥 ÁP DỤNG GIẢM
+                let newTotal = total - data.discount;
+                if (newTotal < 0) newTotal = 0;
+
+                document.getElementById("totalPrice").innerText =
+                    newTotal.toLocaleString("vi-VN");
+
+                document.getElementById("TotalPriceHidden").value = newTotal;
+
+                document.getElementById("voucherCodeHidden").value = code;
+
+                message.innerText = "✅ Giảm " + data.discount.toLocaleString("vi-VN") + "đ";
+                message.className = "text-success";
+
+            } catch {
+                message.innerText = "❌ Lỗi server";
+                message.className = "text-danger";
+            }
+        }
+
+        // ================= GHẾ =================
         function getMaxSeats() {
             let adult = parseInt(document.getElementsByName("AdultTickets")[0].value) || 0;
             let child = parseInt(document.getElementsByName("ChildTickets")[0].value) || 0;
@@ -305,31 +473,53 @@
             let checked = document.querySelectorAll(".seat-checkbox:checked");
 
             if (maxSeats === 0) {
-                alert("Bạn phải chọn số lượng vé trước khi chọn ghế!");
+                alert("Bạn phải chọn số lượng vé trước!");
                 checked.forEach(cb => cb.checked = false);
-                document.querySelectorAll(".seat-badge.bg-success")
-                    .forEach(b => b.classList.remove("bg-success"));
                 return;
             }
 
             if (checked.length > maxSeats) {
-                alert("Bạn chỉ được chọn đúng " + maxSeats + " ghế theo số vé!");
+                alert("Chỉ được chọn " + maxSeats + " ghế!");
                 checked[checked.length - 1].checked = false;
-                return;
             }
         }
 
-        // ================== GHẾ ===================
+        function updateSelectedSeats() {
+            let selected = [];
+            document.querySelectorAll(".seat-checkbox:checked").forEach(cb => {
+                selected.push(cb.value);
+            });
+            document.getElementById("selectedSeats").value = selected.join(",");
+        }
+
+        function validateForm() {
+            updateSelectedSeats();
+
+            let maxSeats = getMaxSeats();
+            let selected = document.getElementById("selectedSeats").value;
+
+            if (maxSeats === 0) {
+                alert("Vui lòng chọn vé!");
+                return false;
+            }
+
+            if (!selected) {
+                alert("Chưa chọn ghế!");
+                return false;
+            }
+
+            if (selected.split(",").length !== maxSeats) {
+                alert("Số ghế phải bằng số vé!");
+                return false;
+            }
+
+            return true;
+        }
+
+        // ================= EVENT =================
         document.querySelectorAll(".seat-checkbox").forEach(cb => {
             cb.addEventListener("change", function () {
-
-                let maxSeats = getMaxSeats();
-                if (maxSeats === 0) {
-                    this.checked = false;
-                    alert("Vui lòng chọn số lượng vé trước!");
-                    return;
-                }
-
+                updateSelectedSeats();
                 limitSeats();
 
                 const badge = this.nextElementSibling;
@@ -340,34 +530,42 @@
             });
         });
 
-        // ================== TÍNH TIỀN ===================
+        // 🔥 FIX RESET + RESET VOUCHER
         document.querySelectorAll(".ticket-input, .combo-input").forEach(el => {
             el.addEventListener("input", function () {
-                // reset ghế khi đổi số vé
-                document.querySelectorAll(".seat-checkbox").forEach(cb => {
-                    cb.checked = false;
-                });
+
+                // reset ghế
+                document.querySelectorAll(".seat-checkbox").forEach(cb => cb.checked = false);
+
                 document.querySelectorAll(".seat-badge").forEach(badge => {
-                    if (!badge.classList.contains("bg-danger")) {
-                        badge.classList.remove("bg-success");
-                        badge.classList.add("bg-secondary");
-                    }
+                    badge.classList.remove("bg-success");
+                    badge.classList.add("bg-secondary");
                 });
+
+                // 🔥 reset voucher
+                discount = 0;
+                document.getElementById("voucherCode").value = "";
+                document.getElementById("voucherMessage").innerText = "";
+                document.getElementById("voucherCodeHidden").value = "";
 
                 calcTotal();
             });
         });
 
-        // ================== COUNTDOWN ===================
+        // ================= COUNTDOWN =================
         let timeLeft = 600;
         setInterval(() => {
             if (timeLeft <= 0) return;
             timeLeft--;
+
             let m = Math.floor(timeLeft / 60);
             let s = timeLeft % 60;
-            document.getElementById("countdown").innerText = `${m}:${s.toString().padStart(2, '0')}`;
+
+            document.getElementById("countdown").innerText =
+                `${m}:${s.toString().padStart(2, '0')}`;
         }, 1000);
 
+        // init
         calcTotal();
     </script>
 }

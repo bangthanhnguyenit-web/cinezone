@@ -6,25 +6,34 @@
     var ended = ViewBag.EndedShowtimes as List<CINEMA.Models.Showtime>;
 }
 
-<div class="container mt-4">
+<div class="container-fluid py-4">
 
-    <h2 class="fw-bold mb-3">📅 Quản lý lịch chiếu</h2>
-    <a asp-action="Create" class="btn btn-primary mb-4">➕ Thêm lịch chiếu</a>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">📅 Quản lý lịch chiếu</h2>
+            <small class="text-muted">Quản lý toàn bộ suất chiếu trong hệ thống</small>
+        </div>
 
-    <!-- =============== ĐANG CHIẾU =============== -->
-    <div class="card shadow-sm mb-5">
-        <div class="card-header bg-success text-white fw-semibold">
+        <a asp-action="Create" class="btn btn-primary shadow-sm px-4">
+            <i class="bi bi-plus-circle me-2"></i> Thêm lịch chiếu
+        </a>
+    </div>
+
+    <!-- ================= ĐANG HOẠT ĐỘNG ================= -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-header bg-success text-white fw-semibold d-flex justify-content-between align-items-center">
             🎬 Suất chiếu đang hoạt động
+            <span class="badge bg-light text-dark">@active?.Count</span>
         </div>
 
         <div class="card-body p-0">
-            <table class="table table-striped align-middle mb-0">
+            <table class="table align-middle mb-0 table-hover">
                 <thead class="table-dark">
                     <tr>
                         <th>Phim</th>
                         <th>Rạp</th>
-                        <th>Bắt đầu</th>
-                        <th>Kết thúc</th>
+                        <th>Thời gian</th>
                         <th>Giá vé</th>
                         <th>Ngôn ngữ</th>
                         <th class="text-center">Hành động</th>
@@ -37,45 +46,87 @@
                         foreach (var s in active)
                         {
                             <tr>
-                                <td>@s.Movie?.Title</td>
+                                <td class="fw-semibold">@s.Movie?.Title</td>
                                 <td>@s.Auditorium?.Name</td>
-                                <td>@s.StartTime?.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>@s.EndTime?.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>@s.BasePrice?.ToString("N0") đ</td>
-                                <td>@s.Language</td>
 
+                                <td>
+                                    <div>
+                                        <span class="badge bg-success">
+                                            @s.StartTime?.ToString("HH:mm dd/MM")
+                                        </span>
+                                        →
+                                        <span class="badge bg-secondary">
+                                            @s.EndTime?.ToString("HH:mm dd/MM")
+                                        </span>
+                                    </div>
+                                </td>
+
+                                <td class="text-danger fw-semibold">
+                                    @s.BasePrice?.ToString("N0") đ
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-info text-dark">
+                                        @s.Language
+                                    </span>
+                                </td>
+
+                                <!-- 🔥 ACTION -->
                                 <td class="text-center">
-                                    <a asp-action="Edit" asp-route-id="@s.ShowtimeId"
-                                       class="btn btn-sm btn-warning">✏️ Sửa</a>
-                                    <a asp-action="Delete" asp-route-id="@s.ShowtimeId"
-                                       class="btn btn-sm btn-danger">🗑 Xóa</a>
+                                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+
+                                        <a asp-action="Edit" asp-route-id="@s.ShowtimeId"
+                                               class="btn btn-sm btn-warning">
+                                            ✏️ Sửa
+                                        </a>
+
+                                        <!-- 🔥 NÚT TẮT PHIM -->
+                                        <form asp-action="Deactivate" asp-route-id="@s.ShowtimeId"
+                                              method="post"
+                                              onsubmit="return confirm('Ngưng suất chiếu này?');">
+                                            <button class="btn btn-sm btn-outline-dark">
+                                                ⛔ Tắt phim
+                                            </button>
+                                        </form>
+
+                                        <a asp-action="Delete" asp-route-id="@s.ShowtimeId"
+                                               class="btn btn-sm btn-danger"
+                                               onclick="return confirm('Xóa suất chiếu này?');">
+                                            🗑
+                                        </a>
+
+                                    </div>
                                 </td>
                             </tr>
                         }
                     }
                     else
                     {
-                        <tr><td colspan="7" class="text-center text-muted py-3">Không có suất chiếu nào.</td></tr>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                Không có suất chiếu nào
+                            </td>
+                        </tr>
                     }
                 </tbody>
             </table>
         </div>
     </div>
 
-    <!-- =============== NGƯNG CHIẾU =============== -->
-    <div class="card shadow-sm mb-5">
-        <div class="card-header bg-secondary text-white fw-semibold">
-            ❌ Suất chiếu đã ngưng hoạt động
+    <!-- ================= ĐÃ NGƯNG ================= -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-secondary text-white fw-semibold d-flex justify-content-between">
+            ❌ Suất chiếu đã ngưng
+            <span class="badge bg-light text-dark">@ended?.Count</span>
         </div>
 
         <div class="card-body p-0">
-            <table class="table table-striped align-middle mb-0">
+            <table class="table align-middle mb-0 table-hover">
                 <thead class="table-dark">
                     <tr>
                         <th>Phim</th>
                         <th>Rạp</th>
-                        <th>Bắt đầu</th>
-                        <th>Kết thúc</th>
+                        <th>Thời gian</th>
                         <th>Giá vé</th>
                         <th>Ngôn ngữ</th>
                         <th class="text-center">Hành động</th>
@@ -87,37 +138,49 @@
                     {
                         foreach (var s in ended)
                         {
-                            <tr>
+                            <tr class="table-light">
+
                                 <td>@s.Movie?.Title</td>
                                 <td>@s.Auditorium?.Name</td>
-                                <td>@s.StartTime?.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>@s.EndTime?.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>@s.BasePrice?.ToString("N0") đ</td>
-                                <td>@s.Language</td>
 
-                                <td class="text-center d-flex justify-content-center gap-2">
-
-                                    <form asp-action="Activate" asp-route-id="@s.ShowtimeId" method="post">
-                                        <button class="btn btn-sm btn-success">🔄 Bật lại</button>
-                                    </form>
-
-                                    <a asp-action="Delete" asp-route-id="@s.ShowtimeId"
-                                       class="btn btn-sm btn-danger">
-                                        🗑 Xóa
-                                    </a>
-
+                                <td>
+                                    @s.StartTime?.ToString("dd/MM HH:mm")
+                                    →
+                                    @s.EndTime?.ToString("dd/MM HH:mm")
                                 </td>
 
+                                <td>@s.BasePrice?.ToString("N0") đ</td>
+
+                                <td>@s.Language</td>
+
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+
+                                        <form asp-action="Activate" asp-route-id="@s.ShowtimeId" method="post">
+                                            <button class="btn btn-sm btn-success">
+                                                🔄 Bật lại
+                                            </button>
+                                        </form>
+
+                                        <a asp-action="Delete" asp-route-id="@s.ShowtimeId"
+                                               class="btn btn-sm btn-danger">
+                                            🗑
+                                        </a>
+
+                                    </div>
+                                </td>
                             </tr>
                         }
                     }
                     else
                     {
-                        <tr><td colspan="7" class="text-center text-muted py-3">Không có suất chiếu ngưng.</td></tr>
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                Không có suất chiếu ngưng
+                            </td>
+                        </tr>
                     }
                 </tbody>
-
-
             </table>
         </div>
     </div>

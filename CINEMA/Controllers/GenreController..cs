@@ -25,7 +25,10 @@ namespace CINEMA.Controllers
         // 🟢 Thêm mới
         public IActionResult Create()
         {
-            ViewBag.Movies = _context.Movies.ToList();
+            ViewBag.Movies = _context.Movies
+                .Where(m => m.IsActive == true) // 🔥 chỉ phim đang chiếu
+                .ToList();
+
             return View();
         }
 
@@ -34,19 +37,29 @@ namespace CINEMA.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Gắn phim được chọn vào thể loại
-                foreach (var movieId in selectedMovies)
+                genre.Movies = new List<Movie>();
+
+                if (selectedMovies != null)
                 {
-                    var movie = _context.Movies.Find(movieId);
-                    if (movie != null)
-                        genre.Movies.Add(movie);
+                    foreach (var movieId in selectedMovies)
+                    {
+                        var movie = _context.Movies.Find(movieId);
+                        if (movie != null)
+                            genre.Movies.Add(movie);
+                    }
                 }
 
                 _context.Genres.Add(genre);
                 _context.SaveChanges();
+
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.Movies = _context.Movies.ToList();
+
+            // 🔥 load lại phim đang chiếu nếu lỗi
+            ViewBag.Movies = _context.Movies
+                .Where(m => m.IsActive == true)
+                .ToList();
+
             return View(genre);
         }
 
@@ -59,8 +72,14 @@ namespace CINEMA.Controllers
 
             if (genre == null) return NotFound();
 
-            ViewBag.Movies = _context.Movies.ToList();
-            ViewBag.SelectedMovies = genre.Movies.Select(m => m.MovieId).ToList();
+            // 🔥 chỉ phim đang chiếu
+            ViewBag.Movies = _context.Movies
+                .Where(m => m.IsActive == true)
+                .ToList();
+
+            ViewBag.SelectedMovies = genre.Movies
+                .Select(m => m.MovieId)
+                .ToList();
 
             return View(genre);
         }
@@ -77,19 +96,23 @@ namespace CINEMA.Controllers
             existing.Name = genre.Name;
             existing.Description = genre.Description;
 
-            // Xóa phim cũ và thêm phim mới
+            // 🔥 clear & add lại
             existing.Movies.Clear();
-            foreach (var movieId in selectedMovies)
+
+            if (selectedMovies != null)
             {
-                var movie = _context.Movies.Find(movieId);
-                if (movie != null)
-                    existing.Movies.Add(movie);
+                foreach (var movieId in selectedMovies)
+                {
+                    var movie = _context.Movies.Find(movieId);
+                    if (movie != null)
+                        existing.Movies.Add(movie);
+                }
             }
 
             _context.SaveChanges();
+
             return RedirectToAction(nameof(Index));
         }
-
         // 🟢 Xóa
         public IActionResult Delete(int id)
         {

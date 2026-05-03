@@ -18,6 +18,42 @@ namespace CINEMA.Controllers
         // =================== [1] DANH SÁCH ĐƠN HÀNG ===================
         public async Task<IActionResult> Index(string search, string status)
         {
+            if (HttpContext.Session.GetString("Role") != "Admin")
+            {
+                return RedirectToAction("Login", "Admin");
+            }
+
+            var now = DateTime.Now;
+
+            // 🔥 1. AUTO HỦY ĐƠN HẾT HẠN
+            var expiredOrders = await _context.Orders
+       .Include(o => o.Tickets)
+       .Where(o => o.Status == "Đang chờ thanh toán"
+           && (
+               (o.ExpiredAt != null && o.ExpiredAt < now)
+               ||
+               (o.ExpiredAt == null && o.CreatedAt != null && o.CreatedAt < now.AddMinutes(-15))
+           )
+       )
+       .ToListAsync();
+
+            foreach (var o in expiredOrders)
+            {
+                o.Status = "Đã hủy";
+
+                // 🔥 update luôn ticket
+                foreach (var t in o.Tickets)
+                {
+                    t.Status = "Đã hủy";
+                }
+            }
+
+            if (expiredOrders.Any())
+            {
+                await _context.SaveChangesAsync();
+            }
+
+            // 🔥 2. QUERY DATA
             var orders = _context.Orders
                 .Include(o => o.Customer)
                 .Include(o => o.Tickets)
@@ -25,7 +61,7 @@ namespace CINEMA.Controllers
                     .ThenInclude(oc => oc.Combo)
                 .AsQueryable();
 
-            // 🔍 Tìm theo tên khách hàng hoặc mã đơn
+            // 🔍 search
             if (!string.IsNullOrWhiteSpace(search))
             {
                 orders = orders.Where(o =>
@@ -33,19 +69,19 @@ namespace CINEMA.Controllers
                     o.OrderId.ToString().Contains(search));
             }
 
-            // 🔍 Lọc theo trạng thái
+            // 🔍 filter status
             if (!string.IsNullOrWhiteSpace(status))
             {
                 orders = orders.Where(o => o.Status == status);
             }
 
+            // 🔥 FIX NULL + SORT
             var list = await orders
-                .OrderByDescending(o => o.CreatedAt)
+                .OrderByDescending(o => o.CreatedAt ?? DateTime.MinValue)
                 .ToListAsync();
 
             return View(list);
         }
-
         // =================== [2] XEM CHI TIẾT ĐƠN HÀNG ===================
         public async Task<IActionResult> Details(int id)
         {
@@ -117,6 +153,27 @@ namespace CINEMA.Controllers
             await _context.SaveChangesAsync();
 
             TempData["Success"] = $"✅ Đã xóa đơn hàng #{id}.";
+            return RedirectToAction(nameof(Index));
+        }
+        [HttpPost]
+        public async Task<IActionResult> CancelOrder(int id)
+        {
+            var order = await _context.Orders
+                .Include(o => o.Tickets)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            if (order == null)
+                return NotFound();
+
+            order.Status = "Đã hủy";
+
+            foreach (var ticket in order.Tickets)
+            {
+                ticket.Status = "Đã hủy";
+            }
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"✅ Đã hủy đơn hàng #{id}.";
             return RedirectToAction(nameof(Index));
         }
     }

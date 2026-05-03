@@ -44,6 +44,22 @@
                         <div class="col-md-6 text-md-end">
                             @if (order.Status == "Chờ thanh toán" || order.Status == "Đang chờ thanh toán")
                             {
+                                <!-- ⏰ COUNTDOWN -->
+                                <p class="mb-2 text-danger fw-bold">
+                                    ⏰ Thời gian còn lại:
+                                    <span class="countdown"
+                                          data-expired="@order.ExpiredAt?.ToString("yyyy-MM-ddTHH:mm:ss")">
+                                        ...
+                                    </span>
+                                </p>
+
+                                <!-- 💳 NÚT THANH TOÁN -->
+                                <a href="@Url.Action("Pay", "Tickets", new { orderId = order.OrderId })"
+                                       class="btn btn-warning btn-sm px-3 me-2 pay-btn">
+                                    💳 Tiếp tục thanh toán
+                                </a>
+
+                                <!-- ❌ HỦY -->
                                 <form asp-controller="Tickets" asp-action="CancelOrder" method="post" class="d-inline">
                                     <input type="hidden" name="orderId" value="@order.OrderId" />
                                     <button type="submit" class="btn btn-danger btn-sm px-3"
@@ -155,3 +171,43 @@
             : "bg-danger";
     }
 }
+<script>
+    function startCountdown() {
+        const countdowns = document.querySelectorAll(".countdown");
+
+        countdowns.forEach(el => {
+            const expiredTime = new Date(el.getAttribute("data-expired")).getTime();
+
+            const interval = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = expiredTime - now;
+
+                if (distance <= 0) {
+                    el.innerHTML = "Hết hạn";
+
+                    const card = el.closest(".card");
+                    const btn = card.querySelector(".pay-btn");
+
+                    if (btn) {
+                        btn.classList.add("disabled");
+                        btn.innerText = "⛔ Hết hạn";
+                        btn.style.pointerEvents = "none";
+                    }
+
+                    clearInterval(interval);
+
+                    // reload để backend auto hủy
+                    setTimeout(() => location.reload(), 2000);
+                    return;
+                }
+
+                const minutes = Math.floor(distance / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                el.innerHTML = minutes + "m " + seconds + "s";
+            }, 1000);
+        });
+    }
+
+    startCountdown();
+</script>

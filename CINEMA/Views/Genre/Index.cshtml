@@ -4,48 +4,106 @@
     Layout = "_AdminLayout";
 }
 
-<div class="container mt-4">
-    <h2 class="fw-bold text-primary mb-3">🎭 Quản lý Thể loại</h2>
-    <a asp-action="Create" class="btn btn-success mb-3">➕ Thêm Thể loại</a>
+<div class="container-fluid py-4">
 
-    <table class="table table-bordered table-striped align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Tên thể loại</th>
-                <th>Mô tả</th>
-                <th>Phim thuộc thể loại</th>
-                <th>Thao tác</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var g in Model)
-            {
-                <tr>
-                    <td>@g.GenreId</td>
-                    <td>@g.Name</td>
-                    <td>@g.Description</td>
-                    <td>
-                        @if (g.Movies.Any())
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-primary mb-0">🎭 Quản lý Thể loại</h2>
+            <small class="text-muted">Danh sách thể loại và phim liên quan</small>
+        </div>
+
+        <a asp-action="Create" class="btn btn-success shadow-sm px-4">
+            <i class="bi bi-plus-circle me-2"></i> Thêm thể loại
+        </a>
+    </div>
+
+    <!-- TABLE -->
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-0">
+
+            <table class="table align-middle mb-0 table-hover">
+
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width:70px;">ID</th>
+                        <th style="width:200px;">Tên thể loại</th>
+                        <th>Mô tả</th>
+                        <th style="width:300px;">Phim</th>
+                        <th class="text-center" style="width:150px;">Thao tác</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var g in Model)
                         {
-                            <ul>
-                                @foreach (var movie in g.Movies)
-                                {
-                                    <li>@movie.Title</li>
-                                }
-                            </ul>
+                            <tr>
+                                <td class="fw-semibold text-muted">@g.GenreId</td>
+
+                                <td>
+                                    <span class="badge bg-primary fs-6">
+                                        @g.Name
+                                    </span>
+                                </td>
+
+                                <td class="text-muted">
+                                    @(string.IsNullOrEmpty(g.Description) ? "—" : g.Description)
+                                </td>
+
+                                <!-- PHIM -->
+                                <td>
+                                    @if (g.Movies != null && g.Movies.Any())
+                                    {
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach (var m in g.Movies)
+                                            {
+                                                <span class="badge bg-light text-dark border">
+                                                    🎬 @m.Title
+                                                </span>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">Không có phim</span>
+                                    }
+                                </td>
+
+                                <!-- ACTION -->
+                                <td class="text-center">
+                                    <div class="d-flex justify-content-center gap-2">
+
+                                        <a asp-action="Edit" asp-route-id="@g.GenreId"
+                                               class="btn btn-sm btn-warning">
+                                            ✏️
+                                        </a>
+
+                                        <a asp-action="Delete" asp-route-id="@g.GenreId"
+                                               class="btn btn-sm btn-danger"
+                                               onclick="return confirm('Xóa thể loại này?');">
+                                            🗑
+                                        </a>
+
+                                    </div>
+                                </td>
+                            </tr>
                         }
-                        else
-                        {
-                            <em class="text-muted">Chưa có phim</em>
-                        }
-                    </td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@g.GenreId" class="btn btn-primary btn-sm">✏ Sửa</a>
-                        <a asp-action="Delete" asp-route-id="@g.GenreId" class="btn btn-danger btn-sm">🗑 Xóa</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                Không có thể loại nào
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
 </div>

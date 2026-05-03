@@ -41,9 +41,6 @@ else
                         <a asp-action="Details" asp-route-id="@o.OrderId" class="btn btn-sm btn-info text-white">
                             <i class="bi bi-eye"></i> Xem
                         </a>
-                        <a asp-action="Edit" asp-route-id="@o.OrderId" class="btn btn-sm btn-warning text-white">
-                            <i class="bi bi-pencil"></i> Sửa
-                        </a>
                         <form asp-action="Delete" method="post" style="display:inline;">
                             <input type="hidden" name="id" value="@o.OrderId" />
                             <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Xóa đơn này?');">

@@ -17,6 +17,8 @@ public partial class Order
 
     public DateTime? CreatedAt { get; set; }
 
+    public DateTime? ExpiredAt { get; set; }
+
     public DateTime? PaidAt { get; set; }
 
     public decimal? TicketTotal { get; set; }

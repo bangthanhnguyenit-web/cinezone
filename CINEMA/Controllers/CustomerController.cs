@@ -149,5 +149,40 @@ namespace CINEMA.Controllers
 
             return View(customer);
         }
+        [HttpGet]
+        public IActionResult EditProfile()
+        {
+            var userId = HttpContext.Session.GetInt32("CustomerId");
+            var customer = _context.Customers.Find(userId);
+            return View(customer);
+        }
+        [HttpPost]
+        public IActionResult EditProfile(Customer model, IFormFile avatarFile)
+        {
+            var userId = HttpContext.Session.GetInt32("CustomerId");
+            var customer = _context.Customers.Find(userId);
+
+            if (customer == null) return NotFound();
+
+            customer.FullName = model.FullName;
+            customer.Phone = model.Phone;
+
+            if (avatarFile != null && avatarFile.Length > 0)
+            {
+                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(avatarFile.FileName);
+                var path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images", fileName);
+
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    avatarFile.CopyTo(stream);
+                }
+
+                customer.Avatar = "/images/" + fileName;
+            }
+
+            _context.SaveChanges();
+
+            return RedirectToAction("Profile");
+        }
     }
 }
