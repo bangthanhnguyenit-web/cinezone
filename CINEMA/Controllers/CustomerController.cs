@@ -1,10 +1,15 @@
 ﻿using CINEMA.Models;
+using CINEMA.ViewModels;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
-using Microsoft.AspNetCore.Http;
-using CINEMA.ViewModels;
-
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 namespace CINEMA.Controllers
 {
     public class CustomerController : Controller
@@ -47,7 +52,7 @@ namespace CINEMA.Controllers
                 BirthDate = model.BirthDate,
                 Gender = model.Gender,
                 CreatedAt = DateTime.Now,
-                PasswordHash = model.Password // ❗ Bé đang không mã hóa
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password)
             };
 
             _context.Customers.Add(customer);
@@ -78,10 +83,30 @@ namespace CINEMA.Controllers
             }
 
             // Tìm khách hàng
-            var customer = _context.Customers
-                .FirstOrDefault(c => c.Email == model.Email && c.PasswordHash == model.Password);
+            var customer = _context.Customers.FirstOrDefault(c => c.Email == model.Email);
 
             if (customer == null)
+            {
+                ViewBag.Error = "Sai tài khoản hoặc mật khẩu!";
+                return View(model);
+            }
+
+            bool checkPassword = false;
+
+            try
+            {
+                checkPassword = BCrypt.Net.BCrypt.Verify(
+                    model.Password,
+                    customer.PasswordHash
+                );
+            }
+            catch
+            {
+                ViewBag.Error = "Tài khoản này đăng nhập bằng Google!";
+                return View(model);
+            }
+
+            if (!checkPassword)
             {
                 ViewBag.Error = "Sai tài khoản hoặc mật khẩu!";
                 return View(model);
@@ -183,6 +208,60 @@ namespace CINEMA.Controllers
             _context.SaveChanges();
 
             return RedirectToAction("Profile");
+        }
+        // ================= LOGIN GOOGLE =================
+
+        public IActionResult LoginGoogle()
+        {
+            var redirectUrl = Url.Action("GoogleResponse", "Customer");
+            var properties = new AuthenticationProperties
+            {
+                RedirectUri = redirectUrl
+            };
+
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+
+        public async Task<IActionResult> GoogleResponse()
+        {
+            var result = await HttpContext.AuthenticateAsync();
+
+            if (!result.Succeeded || result.Principal == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var email = result.Principal.FindFirst(ClaimTypes.Email)?.Value;
+            var name = result.Principal.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return RedirectToAction("Login");
+            }
+
+            var customer = await _context.Customers
+                .FirstOrDefaultAsync(x => x.Email == email);
+
+            // nếu chưa có → tạo mới
+            if (customer == null)
+            {
+                customer = new Customer
+                {
+                    Email = email,
+                    FullName = name ?? email,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString()),
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.Customers.Add(customer);
+                await _context.SaveChangesAsync();
+            }
+
+            // lưu session
+            HttpContext.Session.SetInt32("CustomerId", customer.CustomerId);
+            HttpContext.Session.SetString("CustomerName", customer.FullName);
+            HttpContext.Session.SetString("CustomerEmail", customer.Email);
+            return RedirectToAction("Index", "Home");
         }
     }
 }

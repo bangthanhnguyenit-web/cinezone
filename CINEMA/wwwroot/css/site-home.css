@@ -1,28 +1,104 @@
-﻿/* 🎬 Trang chủ CineZone */
+﻿/* 🎬 CineZone Home - FIX RESPONSIVE KHÔNG VỠ LAYOUT */
 
-/* Banner */
-.banner-img {
-    height: 520px;
-    object-fit: cover;
+/* ===== GLOBAL ===== */
+body {
+    overflow-x: hidden;
 }
 
-/* Đặt vé nhanh */
-.booking-card {
-    margin-top: -80px;
-    z-index: 5;
-    background-color: #fff;
-    border-radius: 20px;
-    max-width: 900px;
-}
-
+/* ===== TEXT GRADIENT ===== */
 .text-gradient {
     background: linear-gradient(90deg, #ef4444, #f97316, #facc15, #22c55e, #3b82f6, #8b5cf6);
-    background-clip: text;
     -webkit-background-clip: text;
+    background-clip: text;
     color: transparent;
 }
 
-/* Movie cards */
+/* ===== BANNER ===== */
+.banner-img,
+.carousel img {
+    width: 100%;
+    height: 520px;
+    object-fit: cover;
+}
+/* ===== SEARCH BOX (GIỮ NGUYÊN LAYOUT) ===== */
+
+/*.search-box {
+    width: 100%;
+    max-width: 1200px;*/ /* gần bằng banner */
+    /*background: rgba(255,255,255,0.95);
+    border-radius: 50px;
+    padding: 10px 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    margin: 15px auto 30px auto;
+}*/
+
+/* 🔥 bắt buộc để button + icon không bị lệch */
+/*.search-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;*/ /* 🔥 thêm để không vỡ */
+    /*border-radius: 50px;
+    padding-left: 40px;
+    padding-right: 130px;*/ /* 🔥 tăng để không che nút */
+    /*height: 45px;
+    border: 1px solid #ddd;
+    transition: 0.3s;
+}
+
+    .search-input:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 8px rgba(220,53,69,0.3);
+    }
+
+.search-icon {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: #888;
+}
+
+.search-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 50px;
+    padding: 6px 20px;
+    background: #dc3545;
+    color: white;
+    font-weight: bold;
+    border: none;
+    transition: 0.3s;
+    white-space: nowrap;
+}
+
+    .search-btn:hover {
+        background: #c82333;
+    }*/
+
+/* ===== RESPONSIVE (KHÔNG VỠ) ===== */
+/*@media (max-width: 992px) {
+    .search-box {
+        max-width: 90%;
+    }
+}
+
+@media (max-width: 576px) {
+    .search-input {
+        padding-right: 90px;
+    }
+
+    .search-btn {
+        padding: 5px 12px;
+        font-size: 14px;
+    }
+}*/
+
+/* ===== MOVIE CARD (GIỮ NGUYÊN HIỆU ỨNG) ===== */
 .movie-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -32,13 +108,15 @@
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
 
-.movie-poster {
-    height: 420px;
-    object-fit: cover;
-    border-radius: 10px 10px 0 0;
-}
+    /* ===== POSTER ===== */
+    .movie-poster,
+    .movie-card img {
+        height: 420px;
+        object-fit: cover;
+        border-radius: 10px 10px 0 0;
+    }
 
-/* Overlay effect */
+/* ===== OVERLAY (GIỮ NGUYÊN) ===== */
 .overlay {
     position: absolute;
     top: 0;
@@ -54,7 +132,7 @@
     opacity: 1;
 }
 
-/* COMING SOON ribbon */
+/* ===== RIBBON ===== */
 .ribbon {
     position: absolute;
     top: 12px;
@@ -67,18 +145,118 @@
     font-size: 0.85rem;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .banner-img {
+/* ===== FIX ROW TRÀN ===== */
+.row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 992px) {
+    .banner-img,
+    .carousel img {
+        height: 380px;
+    }
+
+    .movie-poster,
+    .movie-card img {
         height: 320px;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .banner-img,
+    .carousel img {
+        height: 260px;
+    }
+
+    .movie-poster,
+    .movie-card img {
+        height: 260px;
     }
 
     .booking-card {
         margin-top: -40px;
     }
 
-    .movie-poster {
-        height: 320px;
+    .search-box {
+        max-width: 90%;
     }
 }
 
+@media (max-width: 480px) {
+
+    .banner-img,
+    .carousel img {
+        height: 200px;
+    }
+
+    .movie-poster,
+    .movie-card img {
+        height: 220px;
+    }
+}
+/* ===== QUICK BOOKING FIX ===== */
+.quick-booking {
+    margin-top: -30px; /* kéo lên sát banner */
+    position: relative;
+    z-index: 10;
+}
+
+/* Card đẹp hơn */
+.booking-card {
+    background: rgba(20, 20, 20, 0.95);
+    border-radius: 16px;
+    padding: 25px;
+    backdrop-filter: blur(10px);
+}
+
+/* Title */
+.booking-title {
+    color: #fff;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+/* Select custom */
+.custom-select {
+    background-color: #1f1f1f;
+    color: #fff;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+    .custom-select:focus {
+        border-color: #ef4444;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.3);
+    }
+
+/* Button */
+.btn-book {
+    background: linear-gradient(90deg, #ef4444, #f97316);
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 10px;
+    transition: 0.3s;
+}
+
+    .btn-book:hover {
+        transform: translateY(-2px);
+        opacity: 0.9;
+    }
+
+/* Mobile fix */
+@media (max-width: 768px) {
+    .quick-booking {
+        margin-top: 20px; /* tránh bị đè mobile */
+    }
+}
+.carousel {
+    position: relative;
+    z-index: 1;
+}

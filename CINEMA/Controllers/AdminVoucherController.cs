@@ -60,15 +60,27 @@ namespace CINEMA.Controllers
         }
 
         [HttpPost]
+
         public IActionResult Edit(Voucher v)
         {
+            if (!ModelState.IsValid)
+            {
+                return View(v);
+            }
+
             var existing = _context.Vouchers.Find(v.VoucherId);
-            if (existing == null) return NotFound();
+
+            if (existing == null)
+                return NotFound();
 
             existing.Code = v.Code;
             existing.DiscountPercent = v.DiscountPercent;
             existing.DiscountAmount = v.DiscountAmount;
             existing.MinOrderValue = v.MinOrderValue;
+
+            existing.StartDate = v.StartDate;
+            existing.EndDate = v.EndDate;
+
             existing.ExpiryDate = v.ExpiryDate;
             existing.Quantity = v.Quantity;
             existing.IsActive = v.IsActive;
@@ -76,6 +88,7 @@ namespace CINEMA.Controllers
             _context.SaveChanges();
 
             TempData["Success"] = "Cập nhật thành công!";
+
             return RedirectToAction("Index");
         }
 

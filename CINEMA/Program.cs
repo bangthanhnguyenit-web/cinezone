@@ -1,5 +1,6 @@
 ﻿using CINEMA.Models;
 using CINEMA.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
 namespace CINEMA
@@ -10,21 +11,32 @@ namespace CINEMA
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+            // 🟢 Add services
             builder.Services.AddControllersWithViews();
 
-            // ✅ Đăng ký DbContext, lấy connection string từ appsettings.json
             builder.Services.AddDbContext<CinemaContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("CinemaDb")));
 
-            // ✅ Bật Session (dùng cho đăng nhập/đăng xuất)
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession();
+
             builder.Services.AddScoped<IVnpayService, VnpayService>();
             builder.Services.AddScoped<GeminiService>();
+
+            // 🟢 AUTH (PHẢI đặt trước Build)
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            })
+            .AddCookie(options =>
+            {
+                options.LoginPath = "/Customer/Login";
+            })
+           ;
+
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // 🟢 Middleware
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -35,8 +47,11 @@ namespace CINEMA
             app.UseStaticFiles();
 
             app.UseRouting();
-            app.UseSession();       // <--- Session chạy TRƯỚC
-          //  app.UseAuthorization();
+
+            app.UseAuthentication();   // 🔥 BẮT BUỘC
+            app.UseAuthorization();
+
+            app.UseSession();
 
             app.MapControllerRoute(
                 name: "default",

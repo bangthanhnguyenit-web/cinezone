@@ -134,115 +134,161 @@
 
 
     <!-- MAIN -->
-    <main class="container py-4" style="margin-top:10px;">
+    <main class="container py-4 main-content">
         @RenderBody()
     </main>
-    <!-- FOOTER -->
-    <footer class="text-white mt-5 pt-5 pb-4"
-            style="background: linear-gradient(90deg,#CBE7E3,#3b82f6);">
+<!-- FOOTER -->
+<footer class="footer-cinezone text-white pt-5 pb-4 mt-5">
 
-        <div class="container">
+    <div class="container">
 
-            <div class="row gy-4">
+        <div class="row gy-4 text-center text-lg-start">
 
-                <div class="col-lg-3">
+            <!-- LOGO -->
+            <div class="col-12 col-md-6 col-lg-3">
 
-                    <img src="/images/unnamed.jpg" class="footer-logo" />
+                <img src="/images/unnamed.jpg"
+                     class="footer-logo mb-3" />
 
-                    <p class="small mt-2">Điểm hẹn điện ảnh</p>
+                <p class="small mb-3">
+                    Điểm hẹn điện ảnh
+                </p>
 
-                    <a asp-controller="Home"
-                           asp-action="Schedule"
-                           class="btn btn-warning fw-bold">
+                <a asp-controller="Home"
+                   asp-action="Schedule"
+                   class="btn btn-warning fw-bold px-4 rounded-pill">
 
-                        🎟 ĐẶT VÉ
-                    </a>
-
-                </div>
-
-                <div class="col-lg-2">
-                    <h6>Tài khoản</h6>
-
-                    <a asp-controller="Customer"
-                           asp-action="Login"
-                           class="text-white d-block">
-
-                        Đăng nhập
-                    </a>
-
-                    <a asp-controller="Customer"
-                           asp-action="Register"
-                           class="text-white d-block">
-
-                        Đăng ký
-                    </a>
-                </div>
-
-                <div class="col-lg-2">
-                    <h6>Xem phim</h6>
-
-                    <a asp-controller="Home"
-                           asp-action="Index"
-                           class="text-white d-block">
-
-                        Phim đang chiếu
-                    </a>
-
-                    <a asp-controller="Home"
-                           asp-action="Index"
-                           class="text-white d-block">
-
-                        Phim sắp chiếu
-                    </a>
-
-                </div>
-
-                <div class="col-lg-2">
-                    <h6>Dịch vụ</h6>
-
-                    <a href="#" class="text-white d-block">
-                        Thuê rạp
-                    </a>
-                </div>
-
-                <div class="col-lg-3">
-                    <h6>Hệ thống rạp</h6>
-
-                    <a href="#" class="text-white d-block">
-                        CineZone Quận 1
-                    </a>
-                </div>
-
+                    🎟 ĐẶT VÉ
+                </a>
             </div>
 
-            <hr>
+            <!-- TÀI KHOẢN -->
+            <div class="col-6 col-md-3 col-lg-2">
 
-            <div class="d-flex justify-content-between small">
+                <h6 class="footer-title">Tài khoản</h6>
 
-                <div>
-                    © 2025 <strong>CineZone</strong>
-                </div>
+                <a asp-controller="Customer"
+                   asp-action="Login"
+                   class="footer-link">
+                    Đăng nhập
+                </a>
 
-                <div>
-                    <a asp-controller="Home"
-                           asp-action="Privacy"
-                           class="text-white me-3">
+                <a asp-controller="Customer"
+                   asp-action="Register"
+                   class="footer-link">
+                    Đăng ký
+                </a>
+            </div>
 
-                        Chính sách bảo mật
-                    </a>
+            <!-- XEM PHIM -->
+            <div class="col-6 col-md-3 col-lg-2">
 
-                    <a href="#" class="text-white">
-                        Hỏi & Đáp
-                    </a>
-                </div>
+                <h6 class="footer-title">Xem phim</h6>
+
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="footer-link">
+                    Phim đang chiếu
+                </a>
+
+                <a asp-controller="Home"
+                   asp-action="Index"
+                   class="footer-link">
+                    Phim sắp chiếu
+                </a>
+            </div>
+
+            <!-- DỊCH VỤ -->
+            <div class="col-6 col-md-6 col-lg-2">
+
+                <h6 class="footer-title">Dịch vụ</h6>
+
+                <a href="#" class="footer-link">
+                    Thuê rạp
+                </a>
+            </div>
+
+            <!-- HỆ THỐNG RẠP -->
+            <div class="col-6 col-md-6 col-lg-3">
+
+                <h6 class="footer-title">Hệ thống rạp</h6>
+
+                <a href="#" class="footer-link">
+                    CineZone Quận 1
+                </a>
+            </div>
+
+        </div>
+
+        <hr class="border-light opacity-25 my-4">
+
+        <!-- BOTTOM -->
+        <div class="footer-bottom">
+
+            <div>
+                © 2025 <strong>CineZone</strong>
+            </div>
+
+            <div class="d-flex gap-3">
+
+                <a asp-controller="Home"
+                   asp-action="Privacy"
+                   class="footer-link mb-0">
+                    Chính sách bảo mật
+                </a>
+
+                <a href="#" class="footer-link mb-0">
+                    Hỏi & Đáp
+                </a>
 
             </div>
 
         </div>
 
-    </footer>
+    </div>
 
+</footer>
+<style>
+            .footer-cinezone {
+                background: linear-gradient(90deg, #CBE7E3, #3b82f6);
+            }
 
+            .footer-logo {
+                width: 90px;
+                height: 90px;
+                object-fit: cover;
+                border-radius: 50%;
+            }
+
+            .footer-title {
+                font-weight: 700;
+                margin-bottom: 14px;
+                font-size: 17px;
+            }
+
+            .footer-link {
+                color: white;
+                text-decoration: none;
+                display: block;
+                margin-bottom: 10px;
+                transition: 0.3s;
+            }
+
+                .footer-link:hover {
+                    color: #ffd54f;
+                    transform: translateX(3px);
+                }
+
+            .footer-bottom {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 15px;
+                flex-wrap: wrap;
+                text-align: center;
+                font-size: 14px;
+            }
+</style>
 
     @* <!-- POPUP -->
     @{
