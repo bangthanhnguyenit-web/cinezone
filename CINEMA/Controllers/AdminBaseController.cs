@@ -1,17 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-public class AdminBaseController : Controller
+namespace CINEMA.Controllers
 {
-    public override void OnActionExecuting(ActionExecutingContext context)
+    public class AdminBaseController : Controller
     {
-        var admin = context.HttpContext.Session.GetString("Admin");
-
-        if (admin == null)
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
-            context.Result = new RedirectResult("/Admin/Login");
-        }
+            var role = HttpContext.Session.GetString("Role");
 
-        base.OnActionExecuting(context);
+            if (string.IsNullOrEmpty(role) || role != "Admin")
+            {
+                context.Result = RedirectToAction("Login", "Admin");
+                return;
+            }
+
+            base.OnActionExecuting(context);
+        }
     }
 }

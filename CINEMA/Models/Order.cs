@@ -24,9 +24,11 @@ public partial class Order
     public decimal? TicketTotal { get; set; }
 
     public decimal? ComboTotal { get; set; }
-
+  
     public virtual Customer? Customer { get; set; }
+    public string? VoucherCode { get; set; }
 
+    public decimal? DiscountAmount { get; set; }
     public virtual ICollection<OrderCombo> OrderCombos { get; set; } = new List<OrderCombo>();
 
     public virtual ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();

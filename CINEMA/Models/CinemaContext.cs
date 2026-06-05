@@ -183,6 +183,15 @@ public partial class CinemaContext : DbContext
             entity.HasOne(d => d.Customer).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.CustomerId)
                 .HasConstraintName("FK__Orders__Customer__4BAC3F29");
+            entity.Property(e => e.VoucherCode)
+      .HasMaxLength(50);
+
+            entity.Property(e => e.DiscountAmount)
+                  .HasColumnType("decimal(18,2)"); entity.Property(e => e.VoucherCode)
+      .HasMaxLength(50);
+
+            entity.Property(e => e.DiscountAmount)
+                  .HasColumnType("decimal(18,2)");
         });
 
         modelBuilder.Entity<OrderCombo>(entity =>

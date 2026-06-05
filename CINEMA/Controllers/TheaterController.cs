@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CINEMA.Controllers
 {
-    public class TheaterController : Controller
+    public class TheaterController : AdminBaseController
     {
         private readonly CinemaContext _context;
 

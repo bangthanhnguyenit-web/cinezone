@@ -1,7 +1,8 @@
-﻿using CINEMA.Models;
+﻿using CINEMA.Controllers;
+using CINEMA.Models;
 using Microsoft.AspNetCore.Mvc;
 
-public class AdminPopupController : Controller
+public class AdminPopupController : AdminBaseController
 {
     private readonly CinemaContext _context;
 

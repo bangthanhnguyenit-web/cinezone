@@ -1,10 +1,11 @@
-﻿using CINEMA.Models;
+﻿using CINEMA.Controllers;
+using CINEMA.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CINEMA.Controllers
 {
-    public class MovieController : Controller
+    public class MovieController : AdminBaseController
     {
         private readonly CinemaContext _context;
 

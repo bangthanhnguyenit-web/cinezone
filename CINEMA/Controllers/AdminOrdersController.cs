@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CINEMA.Controllers
 {
-    public class AdminOrdersController : Controller
+    public class AdminOrdersController : AdminBaseController
     {
         private readonly CinemaContext _context;
 

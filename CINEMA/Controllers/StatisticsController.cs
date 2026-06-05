@@ -8,7 +8,7 @@ using CINEMA.ViewModels;
 
 namespace CINEMA.Controllers
 {
-    public class StatisticsController : Controller
+    public class StatisticsController : AdminBaseController
     {
         private readonly CinemaContext _context;
 

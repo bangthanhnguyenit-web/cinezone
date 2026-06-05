@@ -37,7 +37,8 @@ namespace CINEMA.Controllers
             int ChildTickets,
             int StudentTickets,
             decimal TotalPrice,
-            string VoucherCode)
+            string VoucherCode,
+            decimal? DiscountAmount)
         {
             var customerId = HttpContext.Session.GetInt32("CustomerId");
             if (customerId == null)
@@ -52,7 +53,8 @@ namespace CINEMA.Controllers
                 TempData["ChildTickets"] = ChildTickets;
                 TempData["StudentTickets"] = StudentTickets;
                 TempData["TotalPrice"] = TotalPrice.ToString(CultureInfo.InvariantCulture);
-
+                TempData["VoucherCode"] = VoucherCode;
+                TempData["DiscountAmount"] = DiscountAmount;
                 var comboDict = Request.Form.Keys
                     .Where(k => k.StartsWith("Combo_"))
                     .ToDictionary(k => k, k => Request.Form[k].ToString());
@@ -141,6 +143,7 @@ namespace CINEMA.Controllers
                 ChildTickets = ChildTickets,
                 StudentTickets = StudentTickets,
                 TotalPrice = TotalPrice,
+                VoucherCode= VoucherCode,
                 Combos = combosVm
             };
 
@@ -193,8 +196,8 @@ namespace CINEMA.Controllers
                         if (voucher.DiscountAmount != null)
                             total -= voucher.DiscountAmount.Value;
 
-                        voucher.UsedCount++;
-                        _context.SaveChanges();
+                        //voucher.UsedCount++;
+                        //_context.SaveChanges();
                     }
                 }
 
@@ -206,9 +209,18 @@ namespace CINEMA.Controllers
                     CustomerId = customerId.Value,
                     CreatedAt = DateTime.Now,
                     PaidAt = DateTime.Now,
-                    ExpiredAt = DateTime.Now.AddMinutes(15), // 🔥 FIX CHÍNH
-                    TotalAmount = model.TotalPrice,
-                    Status = (method == "Chuyển khoản") ? "Đang chờ thanh toán" : "Chờ thanh toán",
+                    ExpiredAt = DateTime.Now.AddMinutes(15),
+
+                    TotalAmount = total,
+
+                    VoucherCode = model.VoucherCode,
+
+                    DiscountAmount = model.TotalPrice - total,
+
+                    Status = (method == "Chuyển khoản")
+         ? "Đang chờ thanh toán"
+         : "Chờ thanh toán",
+
                     PaymentMethod = method
                 };
 
@@ -296,7 +308,7 @@ namespace CINEMA.Controllers
                     pay.AddRequestData("vnp_Version", "2.1.0");
                     pay.AddRequestData("vnp_Command", "pay");
                     pay.AddRequestData("vnp_TmnCode", tmnCode);
-                    pay.AddRequestData("vnp_Amount", ((long)model.TotalPrice * 100).ToString());
+                    pay.AddRequestData("vnp_Amount", ((long)total * 100).ToString());
                     pay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss"));
                     pay.AddRequestData("vnp_CurrCode", "VND");
                     pay.AddRequestData("vnp_IpAddr", HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1");
@@ -366,6 +378,18 @@ namespace CINEMA.Controllers
                     customer.MembershipLevel = customer.CalculateMembershipLevel();
 
                 }
+                var voucherCode = order.VoucherCode;
+
+                if (!string.IsNullOrEmpty(voucherCode))
+                {
+                    var voucher = _context.Vouchers
+                        .FirstOrDefault(v => v.Code == voucherCode);
+
+                    if (voucher != null)
+                    {
+                        voucher.UsedCount++;
+                    }
+                }
                 _context.SaveChanges();
 
                 ViewBag.Total = order.TotalAmount;
@@ -403,7 +427,8 @@ namespace CINEMA.Controllers
             int child = (int)TempData["ChildTickets"];
             int student = (int)TempData["StudentTickets"];
             decimal total = decimal.Parse((string)TempData["TotalPrice"], CultureInfo.InvariantCulture);
-
+            string voucherCode = (string)TempData["VoucherCode"];
+            decimal? discountAmount = TempData["DiscountAmount"] as decimal?;
             TempData.Keep();
 
             // 📌 Load Theater
@@ -464,6 +489,8 @@ namespace CINEMA.Controllers
                 ChildTickets = child,
                 StudentTickets = student,
                 TotalPrice = total,
+                VoucherCode = voucherCode,
+                DiscountAmount = discountAmount,
                 Combos = combos
             };
 

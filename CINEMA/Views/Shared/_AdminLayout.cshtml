@@ -1,114 +1,405 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+
+<!DOCTYPE html>
+
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - CineZone Admin</title>
-
-    <!-- Bootstrap -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-
-    <!-- 🔹 Custom Admin Style -->
-    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
 
     @RenderSection("Styles", required: false)
+
+    <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                background: #f5f7fb;
+                font-family: 'Segoe UI', sans-serif;
+            }
+
+            .admin-wrapper {
+                display: flex;
+                min-height: 100vh;
+            }
+
+            /* SIDEBAR */
+            .sidebar {
+                width: 280px;
+                background: #111827;
+                color: white;
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                overflow-y: auto;
+                z-index: 1000;
+            }
+
+            .logo {
+                padding: 25px;
+                text-align: center;
+                font-size: 26px;
+                font-weight: 700;
+                border-bottom: 1px solid rgba(255,255,255,.08);
+            }
+
+                .logo .red {
+                    color: #ef4444;
+                }
+
+            .admin-info {
+                text-align: center;
+                padding: 25px 15px;
+                border-bottom: 1px solid rgba(255,255,255,.08);
+            }
+
+            .avatar {
+                width: 75px;
+                height: 75px;
+                border-radius: 50%;
+                background: #374151;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: auto;
+                font-size: 35px;
+                margin-bottom: 10px;
+            }
+
+            .admin-name {
+                font-size: 16px;
+                font-weight: 600;
+            }
+
+            .admin-role {
+                color: #9ca3af;
+                font-size: 13px;
+            }
+
+            .sidebar-menu {
+                list-style: none;
+                padding: 15px 10px;
+            }
+
+                .sidebar-menu li {
+                    margin-bottom: 5px;
+                }
+
+                .sidebar-menu a {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    text-decoration: none;
+                    color: #d1d5db;
+                    padding: 12px 15px;
+                    border-radius: 10px;
+                    transition: .3s;
+                    font-size: 15px;
+                    font-weight: 500;
+                }
+
+                    .sidebar-menu a:hover {
+                        background: #10b981;
+                        color: white;
+                    }
+
+                    .sidebar-menu a i {
+                        font-size: 18px;
+                    }
+
+                    .sidebar-menu a.active {
+                        background: #10b981;
+                        color: #fff;
+                        font-weight: 600;
+                    }
+
+                        .sidebar-menu a.active i {
+                            color: #fff;
+                        }
+
+            /* CONTENT */
+            .main-content {
+                flex: 1;
+                margin-left: 280px;
+                padding: 25px;
+            }
+
+            .content-box {
+                background: white;
+                border-radius: 16px;
+                padding: 25px;
+                min-height: calc(100vh - 50px);
+                box-shadow: 0 3px 15px rgba(0,0,0,.08);
+            }
+
+            /* FOOTER */
+            .footer {
+                margin-top: 20px;
+                text-align: center;
+                color: #6b7280;
+                font-size: 14px;
+            }
+
+            /* SCROLLBAR */
+            .sidebar::-webkit-scrollbar {
+                width: 6px;
+            }
+
+            .sidebar::-webkit-scrollbar-thumb {
+                background: #4b5563;
+                border-radius: 10px;
+            }
+
+            /* MOBILE */
+            @@media (max-width: 992px) {
+
+                .sidebar {
+                    position: relative;
+                    width: 100%;
+                    height: auto;
+                }
+
+                .main-content {
+                    margin-left: 0;
+                }
+
+                .admin-wrapper {
+                    flex-direction: column;
+                }
+            }
+            /* Sidebar thu nhỏ */
+            .sidebar.collapsed {
+                width: 80px;
+            }
+
+                .sidebar.collapsed .logo-text,
+                .sidebar.collapsed .admin-info,
+                .sidebar.collapsed .sidebar-menu span {
+                    display: none;
+                }
+
+                .sidebar.collapsed .sidebar-menu a {
+                    justify-content: center;
+                }
+
+                    .sidebar.collapsed .sidebar-menu a i {
+                        margin: 0;
+                        font-size: 22px;
+                    }
+
+            .main-content {
+                margin-left: 280px;
+                transition: all .3s ease;
+            }
+
+                .main-content.expanded {
+                    margin-left: 80px;
+                }
+
+            /* Toggle button */
+            .toggle-btn {
+                background: transparent;
+                border: none;
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+            }
+
+            .logo {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px;
+            }
+    </style>
 </head>
 
-<body class="d-flex flex-column min-vh-100">
+<body>
+    <div class="admin-wrapper">
 
-    <!-- 🌟 Navbar -->
-    <header class="fixed-top shadow-sm">
-        <nav class="navbar navbar-expand-lg navbar-dark py-3">
-            <div class="container-fluid px-4">
+        <!-- Sidebar -->
+        <aside class="sidebar">
 
-                <!-- Logo -->
-                <a class="navbar-brand d-flex align-items-center gap-2 fw-bold fs-4" asp-controller="Admin" asp-action="Dashboard">
-                    <span class="badge p-2">CZ</span> CineZone <span class="text-danger">Admin</span>
-                </a>
+            <div class="logo">
 
-                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
-                        data-bs-target="#navbarAdmin" aria-controls="navbarAdmin"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+                <span class="logo-text">
+                    CINEZONE
+                </span>
+
+                <button id="toggleSidebar" class="toggle-btn">
+                    <i class="bi bi-list"></i>
                 </button>
 
-                <div class="collapse navbar-collapse" id="navbarAdmin">
-                    <!-- Left menu -->
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-2">
-                        <li class="nav-item">
-                            <a class="nav-link fw-semibold px-3 py-2" asp-controller="Admin" asp-action="Dashboard">
-                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
-                            </a>
-                        </li>
-
-                        @if (Context.Session.GetString("Role") == "Admin")
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link fw-semibold px-3 py-2" asp-controller="Movie" asp-action="Index">
-                                    <i class="bi bi-film me-1"></i> Quản lý Phim
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link fw-semibold px-3 py-2" asp-controller="CustomerAdmin" asp-action="Index">
-                                    <i class="bi bi-people me-1"></i> Khách hàng
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link fw-semibold px-3 py-2" asp-controller="Combo" asp-action="Index">
-                                    <i class="bi bi-cup-straw me-1"></i> Bắp & Nước
-                                </a>
-                            </li>
-                        }
-                    </ul>
-
-                    <!-- Right menu -->
-                    <ul class="navbar-nav ms-auto align-items-center gap-3">
-                        @if (Context.Session.GetString("Role") == "Admin")
-                        {
-                            <li class="nav-item">
-                                <span class="badge rounded-pill px-3 py-2 admin-badge">
-                                    <i class="bi bi-person-circle me-1"></i>
-                                    @Context.Session.GetString("Name") (Admin)
-                                </span>
-                            </li>
-                            <li class="nav-item">
-                                <a class="btn btn-outline-light btn-sm fw-semibold px-3 py-2"
-                                   asp-controller="Admin" asp-action="Logout">
-                                    <i class="bi bi-box-arrow-right me-1"></i> Đăng xuất
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
             </div>
-        </nav>
-    </header>
 
-    <!-- 🌟 Main Content -->
-    <main class="flex-fill py-4">
-        <div class="container-fluid px-4">
-            @RenderBody()
-        </div>
-    </main>
+            <div class="admin-info">
 
-    <!-- 🌟 Footer -->
-    <footer class="border-top mt-auto py-3 shadow-soft">
-        <div class="container-fluid px-4 d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <p class="mb-1 mb-md-0 text-muted">
-                &copy; 2025 <strong class="text-dark">CineZone Admin</strong> — All rights reserved.
-            </p>
-            <p class="mb-0 text-muted">
-                Powered by <span class="text-primary fw-semibold">CineZone Team</span>
-            </p>
-        </div>
-    </footer>
+                <div class="avatar">
+                    <i class="bi bi-person-fill"></i>
+                </div>
 
-    <!-- Scripts -->
+                <div class="admin-name">
+                    @Context.Session.GetString("Name")
+                </div>
+
+                <div class="admin-role">
+                    Administrator
+                </div>
+
+            </div>
+
+            <ul class="sidebar-menu">
+
+                <li>
+                    <a asp-controller="Admin" asp-action="Dashboard"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Admin" ? "active" : "")">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a asp-controller="Theater" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Theater" ? "active" : "")">
+                        <i class="bi bi-building"></i>
+                        <span>Quản lý Rạp</span>
+                    </a>
+                </li>   
+                        
+                <li>                   
+                    <a asp-controller="Auditorium" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Auditorium" ? "active" : "")">
+                        <i class="bi bi-easel"></i>
+                        <span>  Quản lý Phòng Chiếu</span>
+                    </a>
+                </li>   
+                        
+                <li>    
+                    <a asp-controller="Movie" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Movie" ? "active" : "")">
+                        <i class="bi bi-film"></i>
+                        <span>Quản lý Phim</span>
+                    </a>
+                </li>   
+                        
+                <li>    
+                    <a asp-controller="Showtime" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Showtime" ? "active" : "")">
+                        <i class="bi bi-calendar-event"></i>
+                        <span>Quản lý Lịch Chiếu</span>
+                    </a>
+                </li>   
+                        
+                <li>    
+                    <a asp-controller="Genre" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Genre" ? "active" : "")">
+                        <i class="bi bi-tags"></i>
+                        <span> Quản lý Thể Loại</span>
+                    </a>
+                </li>   
+                        
+                <li>    
+                    <a asp-controller="Combo" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Combo" ? "active" : "")">
+                        <i class="bi bi-cup-straw"></i>
+                        <span>  Quản lý Combo</span>
+                    </a>
+                </li>   
+                        
+                <li>    
+                    <a asp-controller="CustomerAdmin" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "CustomerAdmin" ? "active" : "")">
+                        <i class="bi bi-people"></i>
+                        <span>Quản lý Khách Hàng</span>
+                    </a>
+                </li>   
+                        
+                <li>    
+                    <a asp-controller="AdminOrders" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminOrders" ? "active" : "")">
+                        <i class="bi bi-bag-check"></i>
+                        <span>Quản lý Đơn Hàng</span>
+                    </a>
+                </li>   
+                        
+                <li>                     
+                    <a asp-controller="AdminVoucher" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminVoucher" ? "active" : "")">
+                        <i class="bi bi-ticket-perforated"></i>
+                        <span> Quản lý Voucher</span>
+                    </a>
+                </li>   
+                        
+                <li>                    
+                    <a asp-controller="AdminPopup" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "AdminPopup" ? "active" : "")">
+                        <i class="bi bi-megaphone"></i>
+                        <span>Quản lý Popup</span>
+                    </a>
+                </li>   
+                        
+                <li>    
+                    <a asp-controller="Statistics" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Statistics" ? "active" : "")">
+                        <i class="bi bi-bar-chart-line"></i>
+                        <span>Báo Cáo Doanh Thu</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a asp-controller="Admin" asp-action="Logout">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Đăng Xuất</span>
+                    </a>
+                </li>
+
+            </ul>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <div class="content-box">
+                @RenderBody()
+            </div>
+
+            <div class="footer">
+                © 2026 CineZone Admin System. All Rights Reserved.
+            </div>
+
+        </main>
+
+    </div>
+
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
+    <script>
+        const sidebar = document.querySelector('.sidebar');
+        const content = document.querySelector('.main-content');
+        const toggleBtn = document.getElementById('toggleSidebar');
+
+        toggleBtn.addEventListener('click', () => {
+
+        sidebar.classList.toggle('collapsed');
+        content.classList.toggle('expanded');
+
+        const icon = toggleBtn.querySelector('i');
+
+        if (sidebar.classList.contains('collapsed')) {
+        icon.className = 'bi bi-layout-sidebar';
+        } else {
+        icon.className = 'bi bi-list';
+        }
+        });
+    </script>
 </body>
 </html>

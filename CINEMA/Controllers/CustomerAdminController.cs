@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CINEMA.Controllers
 {
-    public class CustomerAdminController : Controller
+    public class CustomerAdminController : AdminBaseController
     {
         private readonly CinemaContext _context;
 

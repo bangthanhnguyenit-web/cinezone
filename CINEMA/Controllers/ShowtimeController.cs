@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CINEMA.Controllers
 {
-    public class ShowtimeController : Controller
+    public class ShowtimeController : AdminBaseController
     {
         private readonly CinemaContext _context;
 

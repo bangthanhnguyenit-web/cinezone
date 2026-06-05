@@ -30,6 +30,7 @@
 
             <th>Số lượng</th>
             <th>Đã dùng</th>
+            <th>Còn lại</th>
             <th>Trạng thái</th>
             <th>Hành động</th>
         </tr>
@@ -49,27 +50,27 @@
 
                 <td>@v.Quantity</td>
                 <td>@v.UsedCount</td>
-
-                <!-- 🔥 TRẠNG THÁI THÔNG MINH -->
-                <td>
-                    @if (!v.IsActive)
-                    {
-                        <span class="text-secondary">Tắt</span>
-                    }
-                    else if (v.StartDate > DateTime.Now)
-                    {
-                        <span class="text-warning">Chưa bắt đầu</span>
-                    }
-                    else if (v.EndDate < DateTime.Now)
-                    {
-                        <span class="text-danger">Hết hạn</span>
-                    }
-                    else
-                    {
-                        <span class="text-success">Hoạt động</span>
-                    }
-                </td>
-
+                <td>@(v.Quantity - v.UsedCount)</td>
+                @if (!v.IsActive)
+                {
+                    <span class="badge bg-secondary">Tắt</span>
+                }
+                else if (v.UsedCount >= v.Quantity)
+                {
+                    <span class="badge bg-danger">Hết lượt</span>
+                }
+                else if (v.StartDate > DateTime.Now)
+                {
+                    <span class="badge bg-warning">Chưa bắt đầu</span>
+                }
+                else if (v.EndDate < DateTime.Now)
+                {
+                    <span class="badge bg-danger">Hết hạn</span>
+                }
+                else
+                {
+                    <span class="badge bg-success">Hoạt động</span>
+                }
                 <td>
                     <a href="/AdminVoucher/Edit/@v.VoucherId" class="btn btn-warning btn-sm">Sửa</a>
                     <a href="/AdminVoucher/Delete/@v.VoucherId"
