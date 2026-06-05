@@ -211,9 +211,16 @@ namespace CINEMA.Controllers
         }
         // ================= LOGIN GOOGLE =================
 
-        public IActionResult LoginGoogle()
+        // ================= LOGIN GOOGLE =================
+
+        public IActionResult LoginGoogle(string? returnUrl = null)
         {
-            var redirectUrl = Url.Action("GoogleResponse", "Customer");
+            var redirectUrl = Url.Action(
+                "GoogleResponse",
+                "Customer",
+                new { returnUrl }
+            );
+
             var properties = new AuthenticationProperties
             {
                 RedirectUri = redirectUrl
@@ -222,7 +229,7 @@ namespace CINEMA.Controllers
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
 
-        public async Task<IActionResult> GoogleResponse()
+        public async Task<IActionResult> GoogleResponse(string? returnUrl = null)
         {
             var result = await HttpContext.AuthenticateAsync();
 
@@ -242,7 +249,6 @@ namespace CINEMA.Controllers
             var customer = await _context.Customers
                 .FirstOrDefaultAsync(x => x.Email == email);
 
-            // nếu chưa có → tạo mới
             if (customer == null)
             {
                 customer = new Customer
@@ -257,10 +263,16 @@ namespace CINEMA.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // lưu session
             HttpContext.Session.SetInt32("CustomerId", customer.CustomerId);
             HttpContext.Session.SetString("CustomerName", customer.FullName);
             HttpContext.Session.SetString("CustomerEmail", customer.Email);
+
+            if (!string.IsNullOrEmpty(returnUrl)
+                && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
             return RedirectToAction("Index", "Home");
         }
     }

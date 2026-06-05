@@ -439,7 +439,7 @@
                     message.className = "text-danger";
                     return;
                 }
-
+                discount = data.discount;
                 // 🔥 ÁP DỤNG GIẢM
                 let newTotal = total - data.discount;
                 if (newTotal < 0) newTotal = 0;
@@ -543,6 +543,7 @@
                 });
 
                 // 🔥 reset voucher
+                updateSelectedSeats();
                 discount = 0;
                 document.getElementById("voucherCode").value = "";
                 document.getElementById("voucherMessage").innerText = "";

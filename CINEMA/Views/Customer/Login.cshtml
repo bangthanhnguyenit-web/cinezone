@@ -79,11 +79,13 @@
                 <span class="text-muted">hoặc</span>
 </div>
 
-<a asp-controller="Customer" asp-action="LoginGoogle"
-   class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2">
-    <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" width="18" />
-    Đăng nhập với Google
-</a>
+            <a asp-controller="Customer"
+               asp-action="LoginGoogle"
+               asp-route-returnUrl="@Model.ReturnUrl"
+               class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2">
+                <img src="https://cdn-icons-png.flaticon.com/512/2991/2991148.png" width="18" />
+                Đăng nhập với Google
+            </a>
             @* Xóa ViewBag.Error ở đây vì đã chuyển lên trên *@
         </div>
     </div>

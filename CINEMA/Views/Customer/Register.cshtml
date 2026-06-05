@@ -1,144 +1,263 @@
 ﻿@model CINEMA.ViewModels.RegisterViewModel
-@* 1. SỬA DÒNG TRÊN *@
+
 @{
-    ViewData["Title"] = "Đăng ký";
-    Layout = "~/Views/Shared/_AuthLayout.cshtml"; 
+    ViewData["Title"] = "Đăng ký CinemaZone";
+    Layout = "~/Views/Shared/_AuthLayout.cshtml";
 }
 
-<div class="container-fluid vh-100 d-flex align-items-center justify-content-center p-0 position-relative">
-    <video autoplay muted loop playsinline
-           class="position-absolute top-0 start-0 w-100 h-100"
-           style="object-fit: cover; z-index: -2;">
-        <source src="~/videos/Cinemaa.mp4" type="video/mp4" />
-        Trình duyệt của bạn không hỗ trợ video.
-    </video>
+<div class="container-fluid vh-100 d-flex p-0">
+    <!-- LEFT SIDE -->
+    <div class="col-md-6 position-relative p-0 d-flex align-items-center justify-content-center text-white">
 
-    <div class="position-absolute top-0 start-0 w-100 h-100"
-         style="background: rgba(0,0,0,0.4); z-index: -1;"></div>
+        <video autoplay muted loop playsinline class="w-100 h-100" style="object-fit: cover;">
+            <source src="~/videos/Cinemavideo.mp4" type="video/mp4" />
+            Trình duyệt của bạn không hỗ trợ video.
+        </video>
 
-    <div class="p-4 rounded shadow text-white"
-         style="background: rgba(255, 255, 255, 0.15);
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.25);
-                width: 400px; max-width: 90%;">
+        <div class="position-absolute top-0 start-0 w-100 h-100"
+             style="background: rgba(0,0,0,0.5);">
+        </div>
 
-        <h2 class="fw-bold text-center mb-2">Đăng ký tài khoản</h2>
-        <p class="text-center text-light mb-4">Tạo tài khoản để bắt đầu trải nghiệm CinemaZONE</p>
+        <div class="position-absolute text-center w-75">
+            <i class="bi bi-film fs-1 mb-3"></i>
 
-        <form asp-action="Register" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-warning"></div>
+            <h2 class="fw-bold">
+                Tham gia cùng CinemaZone!
+            </h2>
 
-            <div class="mb-3">
-                <label asp-for="FullName" class="form-label">Họ tên</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent text-white border-white">
-                        <i class="bi bi-person"></i>
-                    </span>
-                    <input asp-for="FullName" class="form-control bg-transparent text-white border-white" placeholder="Nguyễn Văn A" />
+            <p class="text-light">
+                Tạo tài khoản để nhận ưu đãi hấp dẫn,
+                tích điểm thành viên và đặt vé nhanh chóng.
+            </p>
+
+            <div class="d-flex justify-content-center mt-4">
+                <span class="mx-1 rounded"
+                      style="width:30px;height:4px;background:white;display:inline-block;"></span>
+
+                <span class="mx-1 rounded"
+                      style="width:30px;height:4px;background:rgba(255,255,255,0.5);display:inline-block;"></span>
+
+                <span class="mx-1 rounded"
+                      style="width:30px;height:4px;background:rgba(255,255,255,0.3);display:inline-block;"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="col-md-6 d-flex align-items-center justify-content-center bg-light">
+
+        <div class="w-75 bg-white p-4 rounded shadow">
+
+            <h2 class="fw-bold mb-3 text-center">
+                Đăng ký
+            </h2>
+
+            <p class="text-muted text-center">
+                Tạo tài khoản để bắt đầu trải nghiệm CinemaZone
+            </p>
+
+            <form asp-action="Register" method="post">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger"></div>
+
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger text-center p-2 small">
+                        @ViewBag.Error
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label asp-for="FullName" class="form-label">
+                        Họ và tên
+                    </label>
+
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-person"></i>
+                        </span>
+
+                        <input asp-for="FullName"
+                               class="form-control"
+                               placeholder="Nguyễn Văn A" />
+                    </div>
+
+                    <span asp-validation-for="FullName"
+                          class="text-danger small"></span>
                 </div>
-                <span asp-validation-for="FullName" class="text-warning small"></span>
-            </div>
 
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label">Email</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent text-white border-white">
-                        <i class="bi bi-envelope"></i>
-                    </span>
-                    <input asp-for="Email" type="email" class="form-control bg-transparent text-white border-white" placeholder="abc@email.com" />
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">
+                        Email
+                    </label>
+
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-envelope"></i>
+                        </span>
+
+                        <input asp-for="Email"
+                               type="email"
+                               class="form-control"
+                               placeholder="abc@gmail.com" />
+                    </div>
+
+                    <span asp-validation-for="Email"
+                          class="text-danger small"></span>
                 </div>
-                <span asp-validation-for="Email" class="text-warning small"></span>
-            </div>
 
-            <div class="mb-3">
-                <label asp-for="Phone" class="form-label">Số điện thoại</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent text-white border-white">
-                        <i class="bi bi-telephone"></i>
-                    </span>
-                    <input asp-for="Phone" class="form-control bg-transparent text-white border-white" placeholder="0123456789" />
+                <div class="mb-3">
+                    <label asp-for="Phone" class="form-label">
+                        Số điện thoại
+                    </label>
+
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-telephone"></i>
+                        </span>
+
+                        <input asp-for="Phone"
+                               class="form-control"
+                               placeholder="0123456789" />
+                    </div>
+
+                    <span asp-validation-for="Phone"
+                          class="text-danger small"></span>
                 </div>
-                <span asp-validation-for="Phone" class="text-warning small"></span>
-            </div>
 
-            <div class="mb-3">
-                <label asp-for="BirthDate" class="form-label">Ngày sinh</label>
-                <input asp-for="BirthDate" type="date" class="form-control bg-transparent text-white border-white" />
-                <span asp-validation-for="BirthDate" class="text-warning small"></span>
-            </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="BirthDate"
+                               class="form-label">
+                            Ngày sinh
+                        </label>
 
-            <div class="mb-3">
-                <label asp-for="Gender" class="form-label">Giới tính</label>
-                <select asp-for="Gender" class="form-control bg-transparent text-white border-white">
-                    <option value="">-- Chọn giới tính --</option>
-                    <option value="Nam">Nam</option>
-                    <option value="Nữ">Nữ</option>
-                </select>
-                <span asp-validation-for="Gender" class="text-warning small"></span>
-            </div>
+                        <input asp-for="BirthDate"
+                               type="date"
+                               class="form-control" />
+                    </div>
 
-            <div class="mb-3">
-                @* 2. SỬA: asp-for="Password" *@
-                <label asp-for="Password" class="form-label">Mật khẩu</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent text-white border-white">
-                        <i class="bi bi-lock"></i>
-                    </span>
-                    <input asp-for="Password" id="Password" type="password" class="form-control bg-transparent text-white border-white" placeholder="••••••" required />
-                    <span class="input-group-text bg-transparent text-white border-white" id="togglePassword" style="cursor:pointer;">
-                        <i class="bi bi-eye" id="toggleIcon"></i>
-                    </span>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Gender"
+                               class="form-label">
+                            Giới tính
+                        </label>
+
+                        <select asp-for="Gender"
+                                class="form-select">
+                            <option value="">Chọn giới tính</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                        </select>
+                    </div>
                 </div>
-                <span asp-validation-for="Password" class="text-warning small"></span>
-            </div>
 
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label">Xác nhận mật khẩu</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent text-white border-white">
-                        <i class="bi bi-lock-fill"></i>
-                    </span>
-                    <input asp-for="ConfirmPassword" id="ConfirmPassword" type="password" class="form-control bg-transparent text-white border-white" placeholder="••••••" required />
+                <div class="mb-3">
+                    <label asp-for="Password"
+                           class="form-label">
+                        Mật khẩu
+                    </label>
+
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-lock"></i>
+                        </span>
+
+                        <input asp-for="Password"
+                               id="password"
+                               type="password"
+                               class="form-control"
+                               placeholder="••••••" />
+
+                        <span class="input-group-text bg-white"
+                              id="togglePassword"
+                              style="cursor:pointer;">
+                            <i class="bi bi-eye"
+                               id="toggleIcon"></i>
+                        </span>
+                    </div>
+
+                    <span asp-validation-for="Password"
+                          class="text-danger small"></span>
                 </div>
-                <span asp-validation-for="ConfirmPassword" class="text-warning small"></span>
-            </div>
 
-            <button type="submit" class="btn btn-light w-100 py-2 rounded-3">Đăng ký</button>
-        </form>
+                <div class="mb-3">
+                    <label asp-for="ConfirmPassword"
+                           class="form-label">
+                        Xác nhận mật khẩu
+                    </label>
 
-        @if (ViewBag.Error != null)
-        {
-            <p class="text-warning text-center mt-3">@ViewBag.Error</p>
-        }
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-lock-fill"></i>
+                        </span>
 
-        <div class="text-center mt-3">
-            <small>Đã có tài khoản? <a href="/Customer/Login" class="text-info">Đăng nhập ngay</a></small>
+                        <input asp-for="ConfirmPassword"
+                               type="password"
+                               class="form-control"
+                               placeholder="••••••" />
+                    </div>
+
+                    <span asp-validation-for="ConfirmPassword"
+                          class="text-danger small"></span>
+                </div>
+
+                <button type="submit"
+                        class="btn btn-dark w-100 py-2 rounded-3">
+                    Đăng ký
+                </button>
+
+                <div class="text-center mt-3">
+                    <small>
+                        Đã có tài khoản?
+                        <a asp-controller="Customer"
+                           asp-action="Login">
+                            Đăng nhập ngay
+                        </a>
+                    </small>
+                </div>
+
+            </form>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    ```
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // 4. SỬA: Cập nhật JavaScript
-            const passwordInput = document.getElementById("Password"); // 👈 Sửa id
-            const togglePassword = document.getElementById("togglePassword");
-            const toggleIcon = document.getElementById("toggleIcon");
+
+            const passwordInput =
+                document.getElementById("password");
+
+            const togglePassword =
+                document.getElementById("togglePassword");
+
+            const toggleIcon =
+                document.getElementById("toggleIcon");
 
             togglePassword.addEventListener("click", function () {
-                const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+
+                const type =
+                    passwordInput.getAttribute("type") === "password"
+                        ? "text"
+                        : "password";
+
                 passwordInput.setAttribute("type", type);
 
                 if (type === "password") {
                     toggleIcon.classList.remove("bi-eye-slash");
                     toggleIcon.classList.add("bi-eye");
-                } else {
+                }
+                else {
                     toggleIcon.classList.remove("bi-eye");
                     toggleIcon.classList.add("bi-eye-slash");
                 }
             });
         });
-    </SCript>
+    </script>
+
 }
