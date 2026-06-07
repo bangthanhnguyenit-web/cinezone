@@ -83,8 +83,7 @@ namespace CINEMA.ViewModels
         // =========================
 
         public List<ShowtimeStatisticViewModel> ShowtimeStatistics { get; set; }
-            = new();
-
+     = new();
         public List<decimal> RevenueByShowtime { get; set; }
             = new();
     }

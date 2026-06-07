@@ -336,6 +336,54 @@ namespace CINEMA.Controllers
                 o.Status != null &&
                 (o.Status.ToLower().Contains("hủy") ||
                  o.Status.ToLower().Contains("thất bại")));
+
+
+            // =====================================================
+            // 🔥 DOANH THU THEO SUẤT CHIẾU
+            // =====================================================
+
+            var showtimeStats = await paidOrders
+                .SelectMany(o => o.Tickets)
+                .Where(t =>
+                    t.Showtime != null &&
+                    t.Showtime.Movie != null &&
+                    t.Showtime.Auditorium != null)
+                .GroupBy(t => new
+                {
+                    t.ShowtimeId,
+                    MovieName = t.Showtime.Movie.Title,
+                    AuditoriumName = t.Showtime.Auditorium.Name,
+                    StartTime = t.Showtime.StartTime
+                })
+                .Select(g => new ShowtimeStatisticViewModel
+                {
+                    ShowtimeId = g.Key.ShowtimeId ?? 0,
+
+                    MovieName = g.Key.MovieName ?? "",
+
+                    AuditoriumName = g.Key.AuditoriumName ?? "",
+
+                    StartTime = g.Key.StartTime ?? DateTime.MinValue,
+
+                    TicketCount = g.Count(),
+
+                    Revenue = g.Sum(x => x.Price ?? 0)
+                })
+                .OrderByDescending(x => x.Revenue)
+                .ToListAsync();
+
+            model.ShowtimeStatistics = showtimeStats;
+
+            foreach (var item in showtimeStats)
+            {
+                model.ShowtimeLabels.Add(
+                    $"{item.MovieName} ({item.StartTime:dd/MM HH:mm})");
+
+                model.RevenueByShowtime.Add(
+                    item.Revenue);
+            }
+
+
             return model;
         }
        

@@ -467,18 +467,30 @@
         @Html.Raw(Json.Serialize(Model.ComboPieValues));
 
 
-    function createChart(id, labels, data1, data2) {
-        new Chart(document.getElementById(id), {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    { label: 'Doanh thu', data: data1 },
-                    { label: 'Số vé', data: data2 }
-                ]
-            }
-        });
-    }
+   function createChart(id, labels, data1, data2) {
+    new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Doanh thu',
+                    data: data1,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Số vé',
+                    data: data2,
+                    type: 'line',
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true
+        }
+    });
+}
 
     createChart("revenueByDateChart", labelsByDate, revenueByDate, ticketCountByDate);
     createChart("revenueByMonthChart", labelsByMonth, revenueByMonth, ticketCountByMonth);
@@ -506,7 +518,7 @@
       }
 
     });
-    new Chart(
+  new Chart(
     document.getElementById("showtimeRevenueChart"),
     {
         type: 'bar',
@@ -514,8 +526,14 @@
             labels: showtimeLabels,
             datasets: [{
                 label: 'Doanh thu',
-                data: revenueByShowtime
+                data: revenueByShowtime,
+                maxBarThickness: 60,
+                borderRadius: 6
             }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
         }
     }
 );
