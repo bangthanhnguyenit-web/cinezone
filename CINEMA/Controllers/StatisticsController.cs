@@ -264,8 +264,170 @@ namespace CINEMA.Controllers
                 o.Status != null &&
                 (o.Status.ToLower().Contains("hủy") ||
                  o.Status.ToLower().Contains("thất bại")));
+
+
+
+
+            // 1. Thống kê doanh thu theo Rạp
+            var theaterStats = await _context.Tickets
+                .Where(t => t.Order != null &&
+                            t.Order.Status != null &&
+                            t.Order.Status.ToLower().Contains("thanh toán"))
+                .GroupBy(t => t.Showtime.Auditorium.Theater.Name) // Nhóm theo tên Rạp
+                .Select(g => new {
+                    Name = g.Key ?? "Không xác định", // Tránh lỗi null nếu rạp chưa đặt tên
+                    Revenue = g.Sum(t => t.Price ?? 0)
+                })
+                .ToListAsync();
+
+            model.CinemaLabels = theaterStats.Select(x => x.Name).ToList();
+            model.CinemaRevenue = theaterStats.Select(x => (decimal)x.Revenue).ToList();
+
+            // 2. Thống kê vé theo Suất chiếu (Lấy 10 suất gần nhất)
+            var showtimeStats = await _context.Showtimes
+                .OrderByDescending(s => s.StartTime)
+                .Take(10)
+                .ToListAsync(); // Lấy dữ liệu về memory trước
+
+            var formattedStats = showtimeStats.Select(s => new {
+                // Kiểm tra Movie trước khi truy cập Title
+                Info = $"{s.Movie?.Title ?? "Phim không xác định"} ({s.StartTime:HH:mm})",
+
+                // Kiểm tra Tickets null và kiểm tra từng Order trong Tickets
+                Count = s.Tickets?.Count(t => t.Order != null &&
+                                             t.Order.Status != null &&
+                                             t.Order.Status.Contains("thanh toán")) ?? 0
+            }).ToList();
+
+            model.ShowtimeLabels = formattedStats.Select(x => x.Info).ToList();
+            model.TicketsByShowtime = formattedStats.Select(x => x.Count).ToList();
+
+            // 3. Tính tỷ lệ ghế đã bán (Occupancy Rate)
+            var totalSeats = await _context.Seats.CountAsync();
+            var soldSeats = await _context.Tickets.CountAsync(t => t.Order.Status.Contains("thanh toán"));
+            model.GlobalOccupancyRate = totalSeats > 0 ? (Math.Round((double)soldSeats / totalSeats * 100, 2)) : 0;
             return model;
         }
-      
+        //public async Task<IActionResult> AdvancedStats(DateTime? from, DateTime? to, int? theaterId, int? movieId)
+        //{
+        //    // 1. Gọi BuildDashboard để lấy dữ liệu cơ bản (Tổng doanh thu, hôm nay, tháng này, các đơn hàng...)
+        //    var model = await BuildDashboard(from, to);
+        //    model.SelectedTheaterId = theaterId;
+
+        //    // 2. TẠI ĐÂY: Áp dụng bộ lọc theaterId cho các biểu đồ chuyên sâu
+        //    // Lấy query đã lọc theo rạp
+        //    var query = _context.Tickets
+        //        .Include(t => t.Order)
+        //        .Include(t => t.Showtime)
+        //            .ThenInclude(s => s.Auditorium)
+        //                .ThenInclude(a => a.Theater)
+        //        .Where(t => t.Order != null && t.Order.Status.Contains("thanh toán"));
+
+        //    if (theaterId.HasValue && theaterId.Value > 0)
+        //    {
+        //        query = query.Where(t => t.Showtime.Auditorium.TheaterId == theaterId.Value);
+        //    }
+        //    // LỌC THEO PHIM
+        //    if (movieId.HasValue && movieId.Value > 0)
+        //    {
+        //        query = query.Where(t => t.Showtime.MovieId == movieId.Value);
+        //    }
+        //    // 3. Gán dữ liệu chuyên sâu vào model
+        //    var theaterStats = await query.GroupBy(t => t.Showtime.Auditorium.Theater.Name)
+        //                                  .Select(g => new { Name = g.Key, Count = g.Count() })
+        //                                  .ToListAsync();
+        //    model.CinemaLabels = theaterStats.Select(x => x.Name ?? "Chưa đặt tên").ToList();
+        //    model.CinemaRevenue = theaterStats.Select(x => (decimal)x.Count).ToList(); // Chứa số vé
+
+        //    var showtimeStats = await query.OrderByDescending(t => t.Showtime.StartTime)
+        //                                       .Take(10)
+        //                                       .GroupBy(t => new { t.Showtime.Movie.Title, t.Showtime.StartTime })
+        //                                       .Select(g => new {
+        //                                           Info = $"{g.Key.Title} ({g.Key.StartTime:HH:mm})",
+        //                                           Count = g.Count()
+        //                                       }).ToListAsync();
+        //    model.ShowtimeLabels = showtimeStats.Select(x => x.Info).ToList();
+        //    model.TicketsByShowtime = showtimeStats.Select(x => x.Count).ToList();
+
+        //    // 4. Lấy danh sách rạp cho dropdown
+        //    ViewBag.Theaters = await _context.Theaters.ToListAsync();
+        //    ViewBag.Movies = await _context.Movies.ToListAsync();
+
+        //    return View(model);
+        //}
+        public async Task<IActionResult> AdvancedStats(int? tId, int? mId, int? tId2)
+        {
+            var model = new RevenueDashboardViewModel();
+
+            // --- LỌC BIỂU ĐỒ 1 (Rạp) ---
+            var query1 = _context.Tickets.Where(t => t.Order.Status.Contains("thanh toán"));
+            if (tId.HasValue)
+            {
+                query1 = query1.Where(t => t.Showtime.Auditorium.TheaterId == tId.Value);
+            }
+
+            var theaterStats = await query1.GroupBy(t => t.Showtime.Auditorium.Theater.Name)
+                                           .Select(g => new { Name = g.Key, Count = g.Count() }).ToListAsync();
+            model.CinemaLabels = theaterStats.Select(x => x.Name ?? "N/A").ToList();
+            model.CinemaRevenue = theaterStats.Select(x => (decimal)x.Count).ToList();
+
+            // --- LỌC BIỂU ĐỒ 2 (Suất chiếu) ---
+            var query2 = _context.Tickets.Where(t => t.Order.Status.Contains("thanh toán"));
+            if (mId.HasValue) query2 = query2.Where(t => t.Showtime.MovieId == mId.Value);
+            if (tId2.HasValue) query2 = query2.Where(t => t.Showtime.Auditorium.TheaterId == tId2.Value);
+
+            var showtimeStats = await query2.OrderByDescending(t => t.Showtime.StartTime).Take(10)
+                                            .GroupBy(t => new { t.Showtime.Movie.Title, t.Showtime.StartTime })
+                                            .Select(g => new { Info = $"{g.Key.Title} ({g.Key.StartTime:HH:mm})", Count = g.Count() }).ToListAsync();
+
+            model.ShowtimeLabels = showtimeStats.Select(x => x.Info).ToList();
+            model.TicketsByShowtime = showtimeStats.Select(x => x.Count).ToList();
+
+            ViewBag.Theaters = await _context.Theaters.ToListAsync();
+            ViewBag.Movies = await _context.Movies.ToListAsync();
+
+            // Thêm đoạn này vào cuối hàm AdvancedStats (trước khi return View)
+            var totalSeats = await _context.Seats.CountAsync();
+            // Tính dựa trên query tổng (query2) hoặc query toàn bộ
+            var soldSeats = await _context.Tickets.CountAsync(t => t.Order.Status.Contains("thanh toán"));
+            model.GlobalOccupancyRate = totalSeats > 0 ? Math.Round((double)soldSeats / totalSeats * 100, 2) : 0;
+
+            return View(model);
+        }
+        [HttpGet]
+        public async Task<JsonResult> GetTheaterData(int? tId)
+        {
+            var query = _context.Tickets.Where(t => t.Order.Status.Contains("thanh toán"));
+            if (tId.HasValue && tId > 0) query = query.Where(t => t.Showtime.Auditorium.TheaterId == tId.Value);
+
+            var data = await query.GroupBy(t => t.Showtime.Auditorium.Theater.Name)
+                                  .Select(g => new { Name = g.Key, Count = g.Count() }).ToListAsync();
+            return Json(new { labels = data.Select(x => x.Name), values = data.Select(x => x.Count) });
+        }
+
+        [HttpGet]
+        public async Task<JsonResult> GetShowtimeData(int? mId, int? tId2)
+        {
+            var query = _context.Tickets.Where(t => t.Order.Status.Contains("thanh toán"));
+            if (mId.HasValue && mId > 0) query = query.Where(t => t.Showtime.MovieId == mId.Value);
+            if (tId2.HasValue && tId2 > 0) query = query.Where(t => t.Showtime.Auditorium.TheaterId == tId2.Value);
+
+            var data = await query.OrderByDescending(t => t.Showtime.StartTime)
+                                  .Take(10)
+                                  .GroupBy(t => new { t.Showtime.Movie.Title, t.Showtime.StartTime })
+                                  .Select(g => new {
+                                      Info = $"{g.Key.Title} ({g.Key.StartTime:HH:mm})",
+                                      Count = g.Count()
+                                  })
+                                  .ToListAsync();
+
+            // Đảm bảo dữ liệu không bao giờ là null
+            return Json(new
+            {
+                labels = data.Select(x => x.Info).ToList(),
+                values = data.Select(x => x.Count).ToList()
+            });
+        }
+
     }
 }

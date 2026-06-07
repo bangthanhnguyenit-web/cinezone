@@ -45,5 +45,17 @@ namespace CINEMA.ViewModels
         public List<int> TicketCountByMonth { get; set; } = new();
         public List<int> TicketCountByYear { get; set; } = new();
 
+        // Thêm vào RevenueDashboardViewModel.cs
+        public List<string> CinemaLabels { get; set; } = new();
+        public List<decimal> CinemaRevenue { get; set; } = new();
+
+        public List<string> ShowtimeLabels { get; set; } = new();
+        public List<int> TicketsByShowtime { get; set; } = new();
+
+        // Tỷ lệ lấp đầy
+        public double GlobalOccupancyRate { get; set; }
+        public int? SelectedTheaterId { get; set; }
+        public List<CINEMA.Models.Ticket> Tickets { get; set; } = new();
+
     }
 }
