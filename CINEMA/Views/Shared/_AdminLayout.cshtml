@@ -345,11 +345,19 @@
                     </a>
                 </li>   
                         
-                <li>    
+                <li>
                     <a asp-controller="Statistics" asp-action="Index"
-                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Statistics" ? "active" : "")">
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Statistics" && ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")">
                         <i class="bi bi-bar-chart-line"></i>
                         <span>Báo Cáo Doanh Thu</span>
+                    </a>
+                </li>
+
+                <li>
+                    <a asp-controller="Statistics" asp-action="AdvancedStats"
+                       class="@(ViewContext.RouteData.Values["Controller"]?.ToString() == "Statistics" && ViewContext.RouteData.Values["Action"]?.ToString() == "AdvancedStats" ? "active" : "")">
+                        <i class="bi bi-pie-chart"></i>
+                        <span>Thống Kê Chuyên Sâu</span>
                     </a>
                 </li>
 
