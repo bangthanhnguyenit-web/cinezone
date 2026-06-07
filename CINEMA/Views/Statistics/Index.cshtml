@@ -94,13 +94,7 @@
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card-box">
-            <div class="label">🥤 Combo</div>
-            <div class="value text-success">@Model.ComboRevenue.ToString("N0") ₫</div>
-            <div class="sub">@Model.ComboSold combo</div>
-        </div>
-    </div>
+   
 
 </div>
     <!-- ================= CHART ================= -->
@@ -133,7 +127,143 @@
             </div>
         </div>
     </div>
+    <div class="chart-box mt-4">
 
+        <h4 class="text-center mb-4">
+            🥤 THỐNG KÊ COMBO BẮP NƯỚC
+        </h4>
+
+        <div class="row text-center mb-4">
+
+            <div class="col-md-4">
+                <div class="combo-card">
+                    <div class="combo-title">
+                        Doanh Thu Combo
+                    </div>
+
+                    <div class="combo-value text-success">
+                        @Model.ComboRevenue.ToString("N0") ₫
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="combo-card">
+                    <div class="combo-title">
+                        Đã Bán
+                    </div>
+
+                    <div class="combo-value text-primary">
+                        @Model.ComboSold
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="combo-card">
+                    <div class="combo-title">
+                        Bán Chạy Nhất
+                    </div>
+
+                    <div class="combo-value text-danger">
+                        @Model.BestSellingCombo
+                    </div>
+
+                    <small>
+                        @Model.BestSellingQuantity lượt bán
+                    </small>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-md-5">
+                <canvas id="comboPieChart"></canvas>
+            </div>
+
+            <div class="col-md-7">
+
+                <table class="table table-hover">
+
+                    <thead>
+                        <tr>
+                            <th>Combo</th>
+                            <th>SL</th>
+                            <th>Doanh thu</th>
+                            <th>%</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var combo in Model.ComboStatistics)
+                        {
+                            <tr>
+                                <td>@combo.ComboName</td>
+                                <td>@combo.QuantitySold</td>
+                                <td>@combo.Revenue.ToString("N0") ₫</td>
+                                <td>@combo.Percentage %</td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+    <div class="row mt-4">
+        <div class="col-12">
+
+            <div class="chart-box">
+
+                <h5>📋 Thống kê chi tiết Combo</h5>
+
+                <table class="table table-striped table-hover">
+
+                    <thead>
+                        <tr>
+                            <th>Tên Combo</th>
+                            <th>Số lượng bán</th>
+                            <th>Doanh thu</th>
+                            <th>Tỷ lệ</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var combo in Model.ComboStatistics)
+                        {
+                            <tr>
+
+                                <td>@combo.ComboName</td>
+
+                                <td>@combo.QuantitySold</td>
+
+                                <td>
+                                    @combo.Revenue.ToString("N0") ₫
+                                </td>
+
+                                <td>
+                                    @combo.Percentage %
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    </div>
 </div>
 
 <!-- ================= JS ================= -->
@@ -153,6 +283,14 @@
 
     const movieLabels = @Html.Raw(Json.Serialize(Model.MovieLabels));
     const revenueByMovie = @Html.Raw(Json.Serialize(Model.RevenueByMovie));
+
+
+        const comboPieLabels =
+        @Html.Raw(Json.Serialize(Model.ComboPieLabels));
+
+    const comboPieValues =
+        @Html.Raw(Json.Serialize(Model.ComboPieValues));
+
 
     function createChart(id, labels, data1, data2) {
         new Chart(document.getElementById(id), {
@@ -177,6 +315,21 @@
             labels: movieLabels,
             datasets: [{ data: revenueByMovie }]
         }
+    });
+
+    new Chart(document.getElementById("comboPieChart"), {
+
+        type: 'pie',
+
+        data: {
+
+            labels: comboPieLabels,
+
+         datasets: [{
+                data: comboPieValues
+         }]
+      }
+
     });
 </script>
 
@@ -221,4 +374,23 @@
     }
 
     canvas { max-height: 350px; }
+
+    .combo-card {
+        background: #f8f9fa;
+        border-radius: 15px;
+        padding: 20px;
+        box-shadow: 0 3px 10px rgba(0,0,0,.08);
+        height: 100%;
+    }
+
+    .combo-title {
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 10px;
+    }
+
+    .combo-value {
+        font-size: 28px;
+        font-weight: 700;
+    }
 </style>
