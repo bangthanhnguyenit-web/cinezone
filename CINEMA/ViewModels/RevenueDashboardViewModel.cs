@@ -45,5 +45,22 @@ namespace CINEMA.ViewModels
         public List<int> TicketCountByMonth { get; set; } = new();
         public List<int> TicketCountByYear { get; set; } = new();
 
+
+        // =========================
+        // THỐNG KÊ COMBO CHI TIẾT
+        // =========================
+
+        public List<ComboStatisticViewModel> ComboStatistics { get; set; }
+            = new();
+
+        public string? BestSellingCombo { get; set; }
+
+        public int BestSellingQuantity { get; set; }
+
+        public List<string> ComboPieLabels { get; set; }
+            = new();
+
+        public List<int> ComboPieValues { get; set; }
+            = new();
     }
 }

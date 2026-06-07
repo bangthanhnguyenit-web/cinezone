@@ -101,6 +101,77 @@ namespace CINEMA.Controllers
                 oc.Quantity ?? 0);
 
             // =====================================================
+            // 🔥 THỐNG KÊ CHI TIẾT COMBO
+            // =====================================================
+
+            var comboStats = await paidOrders
+                .SelectMany(o => o.OrderCombos)
+                .Where(oc => oc.Combo != null)
+                .GroupBy(oc => new
+                {
+                    oc.Combo.ComboId,
+                    oc.Combo.Name
+                })
+                .Select(g => new
+                {
+                    ComboName = g.Key.Name,
+
+                    QuantitySold = g.Sum(x =>
+                        x.Quantity ?? 0),
+
+                    Revenue = g.Sum(x =>
+                        (x.UnitPrice ?? 0) *
+                        (x.Quantity ?? 0))
+                })
+                .OrderByDescending(x => x.QuantitySold)
+                .ToListAsync();
+
+            var totalComboSold = comboStats.Sum(x => x.QuantitySold);
+
+            // Bảng thống kê
+            foreach (var item in comboStats)
+            {
+                model.ComboStatistics.Add(
+                    new ComboStatisticViewModel
+                    {
+                        ComboName = item.ComboName ?? "",
+
+                        QuantitySold = item.QuantitySold,
+
+                        Revenue = item.Revenue,
+
+                        Percentage = totalComboSold == 0
+                            ? 0
+                            : Math.Round(
+                                item.QuantitySold * 100.0 /
+                                totalComboSold,
+                                2)
+                    });
+            }
+
+            // Combo bán chạy nhất
+            var bestCombo = comboStats.FirstOrDefault();
+
+            if (bestCombo != null)
+            {
+                model.BestSellingCombo =
+                    bestCombo.ComboName;
+
+                model.BestSellingQuantity =
+                    bestCombo.QuantitySold;
+            }
+
+            // Pie chart
+            foreach (var item in comboStats)
+            {
+                model.ComboPieLabels.Add(
+                    item.ComboName ?? "");
+
+                model.ComboPieValues.Add(
+                    item.QuantitySold);
+            }
+
+            // =====================================================
             // 🔹 Doanh thu & vé theo từng ngày
             // =====================================================
             var dailyStats = await paidOrders
