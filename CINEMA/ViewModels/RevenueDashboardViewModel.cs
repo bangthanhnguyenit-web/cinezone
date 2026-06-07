@@ -85,9 +85,6 @@ namespace CINEMA.ViewModels
         public List<ShowtimeStatisticViewModel> ShowtimeStatistics { get; set; }
             = new();
 
-        public List<string> ShowtimeLabels { get; set; }
-            = new();
-
         public List<decimal> RevenueByShowtime { get; set; }
             = new();
     }
