@@ -70,34 +70,88 @@
             </div>
         </div>
     </div>
+    <div class="row g-4 mt-4">
+        <form method="get" class="row g-3 mb-4 justify-content-center">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Từ ngày</label>
+                <input type="date" name="from" class="form-control"
+                       value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Đến ngày</label>
+                <input type="date" name="to" class="form-control"
+                       value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100 fw-semibold">Lọc</button>
+            </div>
+        </form>
+        <div class="col-md-4">
+            <div class="chart-box">
+                <h5>📅 Số vé theo ngày</h5>
+
+                <canvas id="ticketsByDateChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-box">
+
+                <h5>📆 Số vé theo tháng</h5>
+
+                 <canvas id="ticketsByMonthChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-box">
+                <h5>📊 Số vé theo năm</h5>
+
+                <canvas id="ticketsByYearChart"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // Khai báo biến toàn cục để JS có thể gọi .update() sau này
-    let cinemaChart, showtimeChart;
+    // 1. KHAI BÁO BIẾN TOÀN CỤC (QUAN TRỌNG)
+    let cinemaChart, showtimeChart, ticketsByDateChart, ticketsByMonthChart, ticketsByYearChart;
 
     window.onload = function() {
-    // 1. Biểu đồ Rạp
+    // Khởi tạo các biểu đồ và GÁN vào biến toàn cục
     cinemaChart = new Chart(document.getElementById("cinemaChart"), {
     type: 'bar',
-    data: {
-    labels: @Html.Raw(Json.Serialize(Model.CinemaLabels)),
-    datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.CinemaRevenue)), backgroundColor: '#3b82f6' }]
-    }
+    data: { labels: @Html.Raw(Json.Serialize(Model.CinemaLabels)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.CinemaRevenue)), backgroundColor: '#3b82f6' }] }
     });
 
-    // 2. Biểu đồ Suất chiếu
     showtimeChart = new Chart(document.getElementById("showtimeChart"), {
     type: 'line',
-    data: {
-    labels: @Html.Raw(Json.Serialize(Model.ShowtimeLabels)),
-    datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketsByShowtime)), borderColor: '#10b981' }]
-    }
+    data: { labels: @Html.Raw(Json.Serialize(Model.ShowtimeLabels)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketsByShowtime)), borderColor: '#10b981' }] }
+    });
+
+    ticketsByDateChart = new Chart(document.getElementById("ticketsByDateChart"), {
+    type: 'bar',
+    data: { labels: @Html.Raw(Json.Serialize(Model.LabelsByDate)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketCountByDate)), backgroundColor: '#10b981' }] }
+    });
+
+    ticketsByMonthChart = new Chart(document.getElementById("ticketsByMonthChart"), {
+    type: 'bar',
+    data: { labels: @Html.Raw(Json.Serialize(Model.LabelsByMonth)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketCountByMonth)), backgroundColor: '#8b5cf6' }] }
+    });
+
+    ticketsByYearChart = new Chart(document.getElementById("ticketsByYearChart"), {
+    type: 'bar',
+    data: { labels: @Html.Raw(Json.Serialize(Model.LabelsByYear)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketCountByYear)), backgroundColor: '#f59e0b' }] }
     });
     };
 
+    const labelsByDate = @Html.Raw(Json.Serialize(Model.LabelsByDate));
+    const ticketCountByDate = @Html.Raw(Json.Serialize(Model.TicketCountByDate));
+
+    const labelsByMonth = @Html.Raw(Json.Serialize(Model.LabelsByMonth));
+    const ticketCountByMonth = @Html.Raw(Json.Serialize(Model.TicketCountByMonth));
+
+    const labelsByYear = @Html.Raw(Json.Serialize(Model.LabelsByYear));
+    const ticketCountByYear = @Html.Raw(Json.Serialize(Model.TicketCountByYear));
     // Hàm gọi AJAX cho Rạp
     async function loadTheaterData() {
     const tId = document.querySelector('select[name="tId"]').value;
@@ -126,6 +180,9 @@
     // THÊM DÒNG NÀY: Ép buộc vẽ lại
     showtimeChart.update();
     }
+
+
+
 </script>
 
 <style>

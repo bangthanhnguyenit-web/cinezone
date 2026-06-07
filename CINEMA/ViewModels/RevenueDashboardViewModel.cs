@@ -57,5 +57,7 @@ namespace CINEMA.ViewModels
         public int? SelectedTheaterId { get; set; }
         public List<CINEMA.Models.Ticket> Tickets { get; set; } = new();
 
+
+
     }
 }
