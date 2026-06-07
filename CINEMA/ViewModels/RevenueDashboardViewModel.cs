@@ -62,5 +62,17 @@ namespace CINEMA.ViewModels
 
         public List<int> ComboPieValues { get; set; }
             = new();
+        // =========================
+        // DOANH THU THEO SUẤT CHIẾU
+        // =========================
+
+        public List<ShowtimeStatisticViewModel> ShowtimeStatistics { get; set; }
+            = new();
+
+        public List<string> ShowtimeLabels { get; set; }
+            = new();
+
+        public List<decimal> RevenueByShowtime { get; set; }
+            = new();
     }
 }

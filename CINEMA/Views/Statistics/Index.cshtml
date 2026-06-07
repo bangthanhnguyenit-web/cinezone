@@ -43,156 +43,375 @@
         </div>
     </div>
 </div>
+    <!-- NAVBAR THỐNG KÊ -->
+    <ul class="nav nav-pills justify-content-center mb-4 dashboard-nav">
 
-  <div class="row g-3 mb-4 justify-content-center">
+        <li class="nav-item">
+            <a class="nav-link active"
+               data-bs-toggle="tab"
+               href="#tongquan">
+                📈 Tổng Quan
+            </a>
+        </li>
 
-    <div class="col-md-3">
-        <div class="card-box">
-            <div class="label">Hôm nay</div>
-            <div class="value text-success">@Model.TodayRevenue.ToString("N0") ₫</div>
-            <div class="sub">@Model.TodayTickets vé</div>
+        <li class="nav-item">
+            <a class="nav-link"
+               data-bs-toggle="tab"
+               href="#ve">
+                🎟️ Doanh Thu Vé
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               data-bs-toggle="tab"
+               href="#phim">
+                🎬 Theo Phim
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link"
+               data-bs-toggle="tab"
+               href="#suatchieu">
+                🎬 Suất Chiếu
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               data-bs-toggle="tab"
+               href="#combo">
+                🥤 Combo
+            </a>
+        </li>
+
+        <li class="nav-item">
+            <a class="nav-link"
+               data-bs-toggle="tab"
+               href="#chitiet">
+                📋 Chi Tiết
+            </a>
+        </li>
+
+    </ul>
+
+    <div class="tab-content">
+
+        <!-- ================= TỔNG QUAN ================= -->
+        <div class="tab-pane fade show active" id="tongquan">
+
+            <!-- Card doanh thu -->
+            <div class="row g-3 mb-4 justify-content-center">
+
+                <div class="col-md-3">
+                    <div class="card-box">
+                        <div class="label">Hôm nay</div>
+                        <div class="value text-success">
+                            @Model.TodayRevenue.ToString("N0") ₫
+                        </div>
+                        <div class="sub">
+                            @Model.TodayTickets vé
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card-box">
+                        <div class="label">Tháng</div>
+                        <div class="value text-success">
+                            @Model.MonthRevenue.ToString("N0") ₫
+                        </div>
+                        <div class="sub">
+                            @Model.MonthTickets vé
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card-box">
+                        <div class="label">Tổng</div>
+                        <div class="value text-danger">
+                            @Model.TotalRevenue.ToString("N0") ₫
+                        </div>
+                        <div class="sub">
+                            @Model.TotalTickets vé
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Card trạng thái đơn -->
+            <div class="row g-3 mb-4 justify-content-center">
+
+                <div class="col-md-2">
+                    <div class="card-box border-success">
+                        <div class="label">Đã thanh toán</div>
+                        <div class="value text-success">
+                            @Model.PaidOrders
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="card-box border-warning">
+                        <div class="label">Đang chờ</div>
+                        <div class="value text-warning">
+                            @Model.PendingOrders
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <div class="card-box border-danger">
+                        <div class="label">Đã hủy</div>
+                        <div class="value text-danger">
+                            @Model.CancelledOrders
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Biểu đồ -->
+            <div class="row g-4">
+
+                <div class="col-md-8">
+                    <div class="chart-box">
+                        <h5>📅 Doanh thu theo ngày</h5>
+                        <canvas id="revenueByDateChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="chart-box">
+                        <h5>🎬 Top phim</h5>
+                        <canvas id="revenueByMovieChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row g-4 mt-4">
+
+                <div class="col-md-6">
+                    <div class="chart-box">
+                        <h5>📆 Theo tháng</h5>
+                        <canvas id="revenueByMonthChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="chart-box">
+                        <h5>📊 Theo năm</h5>
+                        <canvas id="revenueByYearChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="card-box">
-            <div class="label">Tháng</div>
-            <div class="value text-success">@Model.MonthRevenue.ToString("N0") ₫</div>
-            <div class="sub">@Model.MonthTickets vé</div>
-        </div>
-    </div>
+        <!-- ================= DOANH THU VÉ ================= -->
+        <div class="tab-pane fade" id="ve">
 
-    <div class="col-md-3">
-        <div class="card-box">
-            <div class="label">Tổng</div>
-            <div class="value text-danger">@Model.TotalRevenue.ToString("N0") ₫</div>
-            <div class="sub">@Model.TotalTickets vé</div>
-        </div>
-    </div>
-
-</div>
-  <div class="row g-3 mb-4 justify-content-center">
-
-    <div class="col-md-2">
-        <div class="card-box border-success">
-            <div class="label">Đã thanh toán</div>
-            <div class="value text-success">@Model.PaidOrders</div>
-        </div>
-    </div>
-
-    <div class="col-md-2">
-        <div class="card-box border-warning">
-            <div class="label">Đang chờ</div>
-            <div class="value text-warning">@Model.PendingOrders</div>
-        </div>
-    </div>
-
-    <div class="col-md-2">
-        <div class="card-box border-danger">
-            <div class="label">Đã hủy</div>
-            <div class="value text-danger">@Model.CancelledOrders</div>
-        </div>
-    </div>
-
-   
-
-</div>
-    <!-- ================= CHART ================= -->
-    <div class="row g-4">
-        <div class="col-md-8">
             <div class="chart-box">
                 <h5>📅 Doanh thu theo ngày</h5>
                 <canvas id="revenueByDateChart"></canvas>
             </div>
+
+            <div class="row g-4 mt-4">
+
+                <div class="col-md-6">
+                    <div class="chart-box">
+                        <h5>📆 Theo tháng</h5>
+                        <canvas id="revenueByMonthChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="chart-box">
+                        <h5>📊 Theo năm</h5>
+                        <canvas id="revenueByYearChart"></canvas>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
-        <div class="col-md-4">
+
+        <!-- ================= THEO PHIM ================= -->
+        <div class="tab-pane fade" id="phim">
+
             <div class="chart-box">
-                <h5>🎬 Top phim</h5>
+                <h5>🎬 Top phim doanh thu</h5>
                 <canvas id="revenueByMovieChart"></canvas>
             </div>
-        </div>
-    </div>
 
-    <div class="row g-4 mt-4">
-        <div class="col-md-6">
+        </div>
+        <div class="tab-pane fade" id="suatchieu">
+
             <div class="chart-box">
-                <h5>📆 Theo tháng</h5>
-                <canvas id="revenueByMonthChart"></canvas>
+
+                <h5>🎬 Doanh thu theo suất chiếu</h5>
+
+                <canvas id="showtimeRevenueChart"></canvas>
+
             </div>
+
+            <div class="chart-box mt-4">
+
+                <table class="table table-striped table-hover">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Mã SC</th>
+                            <th>Phim</th>
+                            <th>Thời gian</th>
+                            <th>Vé bán</th>
+                            <th>Doanh thu</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        @foreach (var item in Model.ShowtimeStatistics)
+                        {
+                            <tr>
+
+                                <td>#@item.ShowtimeId</td>
+
+                                <td>@item.MovieName</td>
+
+                                <td>
+                                    @item.StartTime.ToString("dd/MM/yyyy HH:mm")
+                                </td>
+
+                                <td>@item.TicketCount</td>
+
+                                <td class="fw-bold text-success">
+                                    @item.Revenue.ToString("N0") ₫
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
         </div>
-        <div class="col-md-6">
+
+        <!-- COMBO -->
+        <div class="tab-pane fade" id="combo">
+
+            <!-- GIỮ NGUYÊN TOÀN BỘ PHẦN COMBO CỦA BẠN -->
+
+            <h4 class="text-center mb-4">
+                🥤 THỐNG KÊ COMBO BẮP NƯỚC
+            </h4>
+
+            <div class="row text-center mb-4">
+
+                <div class="col-md-4">
+                    <div class="combo-card">
+                        <div class="combo-title">
+                            Doanh Thu Combo
+                        </div>
+
+                        <div class="combo-value text-success">
+                            @Model.ComboRevenue.ToString("N0") ₫
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="combo-card">
+                        <div class="combo-title">
+                            Đã Bán
+                        </div>
+
+                        <div class="combo-value text-primary">
+                            @Model.ComboSold
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="combo-card">
+                        <div class="combo-title">
+                            Bán Chạy Nhất
+                        </div>
+
+                        <div class="combo-value text-danger">
+                            @Model.BestSellingCombo
+                        </div>
+
+                        <small>
+                            @Model.BestSellingQuantity lượt bán
+                        </small>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-5">
+                    <canvas id="comboPieChart"></canvas>
+                </div>
+
+                <div class="col-md-7">
+
+                    <table class="table table-hover">
+
+                        <thead>
+                            <tr>
+                                <th>Combo</th>
+                                <th>SL</th>
+                                <th>Doanh thu</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var combo in Model.ComboStatistics)
+                            {
+                                <tr>
+                                    <td>@combo.ComboName</td>
+                                    <td>@combo.QuantitySold</td>
+                                    <td>@combo.Revenue.ToString("N0") ₫</td>
+                                    <td>@combo.Percentage %</td>
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+        <!-- CHI TIẾT -->
+        <div class="tab-pane fade" id="chitiet">
+
             <div class="chart-box">
-                <h5>📊 Theo năm</h5>
-                <canvas id="revenueByYearChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="chart-box mt-4">
 
-        <h4 class="text-center mb-4">
-            🥤 THỐNG KÊ COMBO BẮP NƯỚC
-        </h4>
+                <h5>📋 Thống kê chi tiết Combo</h5>
 
-        <div class="row text-center mb-4">
-
-            <div class="col-md-4">
-                <div class="combo-card">
-                    <div class="combo-title">
-                        Doanh Thu Combo
-                    </div>
-
-                    <div class="combo-value text-success">
-                        @Model.ComboRevenue.ToString("N0") ₫
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="combo-card">
-                    <div class="combo-title">
-                        Đã Bán
-                    </div>
-
-                    <div class="combo-value text-primary">
-                        @Model.ComboSold
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="combo-card">
-                    <div class="combo-title">
-                        Bán Chạy Nhất
-                    </div>
-
-                    <div class="combo-value text-danger">
-                        @Model.BestSellingCombo
-                    </div>
-
-                    <small>
-                        @Model.BestSellingQuantity lượt bán
-                    </small>
-                </div>
-            </div>
-
-        </div>
-
-        <div class="row">
-
-            <div class="col-md-5">
-                <canvas id="comboPieChart"></canvas>
-            </div>
-
-            <div class="col-md-7">
-
-                <table class="table table-hover">
+                <table class="table table-striped table-hover">
 
                     <thead>
                         <tr>
-                            <th>Combo</th>
-                            <th>SL</th>
+                            <th>Tên Combo</th>
+                            <th>Số lượng bán</th>
                             <th>Doanh thu</th>
-                            <th>%</th>
+                            <th>Tỷ lệ</th>
                         </tr>
                     </thead>
 
@@ -217,54 +436,6 @@
         </div>
 
     </div>
-    <div class="row mt-4">
-        <div class="col-12">
-
-            <div class="chart-box">
-
-                <h5>📋 Thống kê chi tiết Combo</h5>
-
-                <table class="table table-striped table-hover">
-
-                    <thead>
-                        <tr>
-                            <th>Tên Combo</th>
-                            <th>Số lượng bán</th>
-                            <th>Doanh thu</th>
-                            <th>Tỷ lệ</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-
-                        @foreach (var combo in Model.ComboStatistics)
-                        {
-                            <tr>
-
-                                <td>@combo.ComboName</td>
-
-                                <td>@combo.QuantitySold</td>
-
-                                <td>
-                                    @combo.Revenue.ToString("N0") ₫
-                                </td>
-
-                                <td>
-                                    @combo.Percentage %
-                                </td>
-
-                            </tr>
-                        }
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-    </div>
-</div>
 
 <!-- ================= JS ================= -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -283,7 +454,11 @@
 
     const movieLabels = @Html.Raw(Json.Serialize(Model.MovieLabels));
     const revenueByMovie = @Html.Raw(Json.Serialize(Model.RevenueByMovie));
+        const showtimeLabels =
+        @Html.Raw(Json.Serialize(Model.ShowtimeLabels));
 
+        const revenueByShowtime =
+        @Html.Raw(Json.Serialize(Model.RevenueByShowtime));
 
         const comboPieLabels =
         @Html.Raw(Json.Serialize(Model.ComboPieLabels));
@@ -331,6 +506,19 @@
       }
 
     });
+    new Chart(
+    document.getElementById("showtimeRevenueChart"),
+    {
+        type: 'bar',
+        data: {
+            labels: showtimeLabels,
+            datasets: [{
+                label: 'Doanh thu',
+                data: revenueByShowtime
+            }]
+        }
+    }
+);
 </script>
 
 <!-- ================= STYLE ================= -->
@@ -393,4 +581,23 @@
         font-size: 28px;
         font-weight: 700;
     }
+    .dashboard-nav {
+    margin-top: 15px;
+}
+
+.dashboard-nav .nav-link {
+    border-radius: 50px;
+    padding: 10px 22px;
+    margin: 0 6px;
+    font-weight: 600;
+    color: #555;
+    background: white;
+    transition: .3s;
+}
+
+.dashboard-nav .nav-link.active {
+    background: linear-gradient(135deg,#0d6efd,#6610f2);
+    color: white !important;
+    box-shadow: 0 5px 15px rgba(13,110,253,.3);
+}
 </style>
