@@ -60,7 +60,8 @@ namespace CINEMA.ViewModels
 
 
 
-
+        public List<string> MovieTicketLabels { get; set; } = new();
+        public List<int> TicketsByMovie { get; set; } = new();
 
         // =========================
         // THỐNG KÊ COMBO CHI TIẾT

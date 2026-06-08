@@ -439,29 +439,58 @@ namespace CINEMA.Controllers
         }
 
         [HttpGet]
-        public async Task<JsonResult> GetShowtimeData(int? mId, int? tId2)
+        public async Task<JsonResult> GetMovieTicketData(int? mId)
         {
-            var query = _context.Tickets.Where(t => t.Order.Status.Contains("thanh toán"));
-            if (mId.HasValue && mId > 0) query = query.Where(t => t.Showtime.MovieId == mId.Value);
-            if (tId2.HasValue && tId2 > 0) query = query.Where(t => t.Showtime.Auditorium.TheaterId == tId2.Value);
+            var query = _context.Tickets.Where(t => t.Order.Status.Contains("thanh toán") && t.Showtime != null);
 
-            var data = await query.OrderByDescending(t => t.Showtime.StartTime)
+            if (mId.HasValue && mId > 0)
+                query = query.Where(t => t.Showtime.MovieId == mId.Value);
+
+            var data = await query.GroupBy(t => t.Showtime.Movie.Title)
+                                  .Select(g => new { Name = g.Key, Count = g.Count() })
+                                  .OrderByDescending(x => x.Count)
                                   .Take(10)
-                                  .GroupBy(t => new { t.Showtime.Movie.Title, t.Showtime.StartTime })
-                                  .Select(g => new {
-                                      Info = $"{g.Key.Title} ({g.Key.StartTime:HH:mm})",
-                                      Count = g.Count()
-                                  })
                                   .ToListAsync();
 
-            // Đảm bảo dữ liệu không bao giờ là null
-            return Json(new
-            {
-                labels = data.Select(x => x.Info).ToList(),
-                values = data.Select(x => x.Count).ToList()
-            });
+            return Json(new { labels = data.Select(x => x.Name), values = data.Select(x => x.Count) });
         }
 
+        [HttpGet]
+        public async Task<JsonResult> GetShowtimeTicketData(int? mId, int? tId2)
+        {
+            // 1. Lấy tất cả suất chiếu thỏa mãn điều kiện lọc
+            var showtimesQuery = _context.Showtimes
+                .Include(s => s.Movie)
+                .AsQueryable();
+
+            if (mId.HasValue && mId > 0) showtimesQuery = showtimesQuery.Where(s => s.MovieId == mId.Value);
+            if (tId2.HasValue && tId2 > 0) showtimesQuery = showtimesQuery.Where(s => s.Auditorium.TheaterId == tId2.Value);
+
+            var showtimes = await showtimesQuery.OrderBy(s => s.StartTime).Take(10).ToListAsync();
+
+            // 2. Lấy số vé đã bán của các suất chiếu này
+            var tickets = await _context.Tickets
+                .Where(t => t.Order.Status.Contains("thanh toán"))
+                .GroupBy(t => t.ShowtimeId)
+                .Select(g => new { ShowtimeId = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            // 3. Kết hợp lại (Left Join trong bộ nhớ)
+            var data = showtimes.Select(s => new {
+                Title = s.Movie.Title,
+                // Đặt tên là 'Time' để khớp với đoạn return JSON bên dưới
+                Time = s.StartTime?.ToString("HH:mm") ?? "--:--",
+                RawTime = s.StartTime,
+                Count = tickets.FirstOrDefault(t => t.ShowtimeId == s.ShowtimeId)?.Count ?? 0
+            }).ToList();
+
+            return Json(new
+            {
+                // Bây giờ x.Time đã tồn tại trong anonymous type của bạn
+                labels = data.Select(x => $"{x.Title} ({x.Time})").ToList(),
+                values = data.Select(x => x.Count).ToList()
+            }); ;
+        }
 
     }
 }

@@ -6,10 +6,6 @@
 
 <div class="container mt-4">
     <h2 class="fw-bold mb-4 text-center text-gradient">📊 Báo cáo chuyên sâu</h2>
-    <div class="alert alert-info">
-        <p>Debug: TheaterId đang nhận là: <b>@(Model.SelectedTheaterId)</b></p>
-        <p>Số vé tìm thấy với lọc này: <b>@Model.Tickets.Count()</b></p>
-    </div>
 
     <div class="row mb-4 justify-content-center">
         <div class="col-md-4">
@@ -20,128 +16,124 @@
         </div>
     </div>
 
-    <div class="row g-4">
+    <div class="row g-4 mb-4">
         <div class="col-md-6">
             <div class="chart-box">
-                <form method="get" class="row g-2 mb-3">
+                <h5>🏢 Vé bán theo rạp</h5>
+                <form class="row g-2 mb-3">
                     <div class="col-md-8">
                         <select name="tId" class="form-select">
                             <option value="">-- Chọn Rạp --</option>
-                            @foreach (var t in (List<CINEMA.Models.Theater>)ViewBag.Theaters)
-                            {
+                            @foreach (var t in (List<CINEMA.Models.Theater>)ViewBag.Theaters) {
                                 <option value="@t.TheaterId" selected="@(Context.Request.Query["tId"] == t.TheaterId.ToString())">@t.Name</option>
                             }
                         </select>
                     </div>
-                    <div class="col-md-4">
-                        <button type="button" onclick="loadTheaterData()" class="btn btn-primary">Lọc</button>
-                    </div>
+                    <div class="col-md-4"><button type="button" onclick="loadTheaterData()" class="btn btn-primary w-100">Lọc</button></div>
                 </form>
                 <canvas id="cinemaChart"></canvas>
             </div>
         </div>
         <div class="col-md-6">
             <div class="chart-box">
-                <h5>🎬 Vé bán theo suất chiếu</h5>
-                <form method="get" class="row g-2 mb-3">
-                    <div class="col-md-5">
-                        <select name="mId" class="form-select">
-                            <option value="">-- Chọn Phim --</option>
-                            @foreach (var m in (List<CINEMA.Models.Movie>)ViewBag.Movies)
-                            {
-                                <option value="@m.MovieId" selected="@(Context.Request.Query["mId"] == m.MovieId.ToString())">@m.Title</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-5">
-                        <select name="tId2" class="form-select">
-                            <option value="">-- Chọn Rạp --</option>
-                            @foreach (var t in (List<CINEMA.Models.Theater>)ViewBag.Theaters)
-                            {
-                                <option value="@t.TheaterId" selected="@(Context.Request.Query["tId2"] == t.TheaterId.ToString())">@t.Name</option>
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <button type="button" onclick="loadShowtimeData()" class="btn btn-primary">Lọc</button>
-                    </div>
+                <h5>🎬 Vé bán theo phim</h5>
+                <form class="row g-2 mb-3">
+                    <div class="col-md-9"><select id="movieSelect" class="form-select">
+                        <option value="">-- Tất cả phim --</option>
+                        @foreach (var m in (List<CINEMA.Models.Movie>)ViewBag.Movies) {
+                            <option value="@m.MovieId">@m.Title</option>
+                        }
+                    </select></div>
+                    <div class="col-md-3"><button type="button" onclick="loadMovieData()" class="btn btn-primary w-100">Lọc</button></div>
                 </form>
-                <canvas id="showtimeChart"></canvas>
+                <canvas id="movieChart"></canvas>
             </div>
         </div>
     </div>
-    <div class="row g-4 mt-4">
+
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="chart-box">
+                <h5>⏰ Vé bán theo suất chiếu</h5>
+                <form class="row g-2 mb-3">
+                    <div class="col-md-5"><select id="showtimeMovieSelect" class="form-select">
+                        <option value="">-- Chọn Phim --</option>
+                        @foreach (var m in (List<CINEMA.Models.Movie>)ViewBag.Movies) { <option value="@m.MovieId">@m.Title</option> }
+                    </select></div>
+                    <div class="col-md-5"><select id="showtimeTheaterSelect" class="form-select">
+                        <option value="">-- Chọn Rạp --</option>
+                        @foreach (var t in (List<CINEMA.Models.Theater>)ViewBag.Theaters) { <option value="@t.TheaterId">@t.Name</option> }
+                    </select></div>
+                    <div class="col-md-2"><button type="button" onclick="loadShowtimeChart()" class="btn btn-primary w-100">Lọc</button></div>
+                </form>
+                <canvas id="showtimeChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-2">
         <form method="get" class="row g-3 mb-4 justify-content-center">
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Từ ngày</label>
-                <input type="date" name="from" class="form-control"
-                       value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" />
-            </div>
-            <div class="col-md-3">
-                <label class="form-label fw-semibold">Đến ngày</label>
-                <input type="date" name="to" class="form-control"
-                       value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" />
-            </div>
-            <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary w-100 fw-semibold">Lọc</button>
-            </div>
+            <div class="col-md-3"><input type="date" name="from" class="form-control" value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" /></div>
+            <div class="col-md-3"><input type="date" name="to" class="form-control" value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" /></div>
+            <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Lọc thời gian</button></div>
         </form>
-        <div class="col-md-4">
-            <div class="chart-box">
-                <h5>📅 Số vé theo ngày</h5>
-
-                <canvas id="ticketsByDateChart"></canvas>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="chart-box">
-
-                <h5>📆 Số vé theo tháng</h5>
-
-                 <canvas id="ticketsByMonthChart"></canvas>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="chart-box">
-                <h5>📊 Số vé theo năm</h5>
-
-                <canvas id="ticketsByYearChart"></canvas>
-            </div>
-        </div>
+        <div class="col-md-4"><div class="chart-box"><h5>📅 Theo ngày</h5><canvas id="ticketsByDateChart"></canvas></div></div>
+        <div class="col-md-4"><div class="chart-box"><h5>📆 Theo tháng</h5><canvas id="ticketsByMonthChart"></canvas></div></div>
+        <div class="col-md-4"><div class="chart-box"><h5>📊 Theo năm</h5><canvas id="ticketsByYearChart"></canvas></div></div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     // 1. KHAI BÁO BIẾN TOÀN CỤC (QUAN TRỌNG)
-    let cinemaChart, showtimeChart, ticketsByDateChart, ticketsByMonthChart, ticketsByYearChart;
+    let cinemaChart, movieChart, ticketsByDateChart, ticketsByMonthChart, ticketsByYearChart;
 
     window.onload = function() {
-    // Khởi tạo các biểu đồ và GÁN vào biến toàn cục
+    // Cấu hình chung cho biểu đồ cột: vừa mảnh, vừa cố định trục Y ở 20
+    const barOptions = {
+    barPercentage: 0.4,
+    categoryPercentage: 0.5,
+    scales: {
+    y: {
+    beginAtZero: true,
+    max: 20, // Cố định đỉnh biểu đồ tại 20
+    ticks: {
+    stepSize: 2 // Nhảy cách 2 đơn vị cho dễ đọc
+    }
+    }
+    }
+    };
+
+    // 1. Biểu đồ Rạp
     cinemaChart = new Chart(document.getElementById("cinemaChart"), {
     type: 'bar',
-    data: { labels: @Html.Raw(Json.Serialize(Model.CinemaLabels)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.CinemaRevenue)), backgroundColor: '#3b82f6' }] }
+    data: {
+    labels: @Html.Raw(Json.Serialize(Model.CinemaLabels)),
+    datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.CinemaRevenue)), backgroundColor: '#3b82f6' }]
+    },
+    options: barOptions
     });
 
-    showtimeChart = new Chart(document.getElementById("showtimeChart"), {
-    type: 'line',
-    data: { labels: @Html.Raw(Json.Serialize(Model.ShowtimeLabels)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketsByShowtime)), borderColor: '#10b981' }] }
-    });
-
+    // 2. Các biểu đồ Số vé (Date, Month, Year)
     ticketsByDateChart = new Chart(document.getElementById("ticketsByDateChart"), {
     type: 'bar',
-    data: { labels: @Html.Raw(Json.Serialize(Model.LabelsByDate)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketCountByDate)), backgroundColor: '#10b981' }] }
+    data: { labels: @Html.Raw(Json.Serialize(Model.LabelsByDate)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketCountByDate)), backgroundColor: '#10b981' }] },
+    options: barOptions
     });
 
     ticketsByMonthChart = new Chart(document.getElementById("ticketsByMonthChart"), {
     type: 'bar',
-    data: { labels: @Html.Raw(Json.Serialize(Model.LabelsByMonth)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketCountByMonth)), backgroundColor: '#8b5cf6' }] }
+    data: { labels: @Html.Raw(Json.Serialize(Model.LabelsByMonth)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketCountByMonth)), backgroundColor: '#8b5cf6' }] },
+    options: barOptions
     });
 
     ticketsByYearChart = new Chart(document.getElementById("ticketsByYearChart"), {
     type: 'bar',
-    data: { labels: @Html.Raw(Json.Serialize(Model.LabelsByYear)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketCountByYear)), backgroundColor: '#f59e0b' }] }
+    data: { labels: @Html.Raw(Json.Serialize(Model.LabelsByYear)), datasets: [{ label: 'Số vé', data: @Html.Raw(Json.Serialize(Model.TicketCountByYear)), backgroundColor: '#f59e0b' }] },
+    options: barOptions
     });
+
+    loadMovieData();
     };
 
     const labelsByDate = @Html.Raw(Json.Serialize(Model.LabelsByDate));
@@ -162,26 +154,100 @@
     cinemaChart.update();
     }
 
-    // Hàm gọi AJAX cho Suất chiếu (Phim + Rạp)
-    async function loadShowtimeData() {
-    const mId = document.querySelector('select[name="mId"]').value;
-    const tId2 = document.querySelector('select[name="tId2"]').value;
+    async function loadMovieData() {
+    const mId = document.getElementById("movieSelect").value;
 
-    const response = await fetch(`/Statistics/GetShowtimeData?mId=${mId}&tId2=${tId2}`);
+    // Chỉ gửi mId vì Controller của bạn hiện tại không nhận tId2 nữa
+    const response = await fetch(`/Statistics/GetMovieTicketData?mId=${mId}`);
     const data = await response.json();
 
-    // Log ra console để xem dữ liệu có về không (F12 xem tab Console)
-    console.log("Dữ liệu nhận được:", data);
-
-    // Cập nhật biểu đồ
-    showtimeChart.data.labels = data.labels;
-    showtimeChart.data.datasets[0].data = data.values;
-
-    // THÊM DÒNG NÀY: Ép buộc vẽ lại
-    showtimeChart.update();
+    // Hủy biểu đồ cũ để tránh chồng chéo khi update
+    if (movieChart) {
+    movieChart.destroy();
     }
 
+    // Vẽ lại biểu đồ
+    const ctx = document.getElementById("movieChart").getContext('2d');
+    movieChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+    labels: data.labels,
+    datasets: [{
+    label: 'Số vé bán ra',
+    data: data.values,
+    backgroundColor: '#6610f2'
+    }]
+    },
+    options: {
+    barPercentage: 0.4,
+    categoryPercentage: 0.5,
+    scales: {
+    y: {
+    beginAtZero: true,
+    max: 20, // Cố định đỉnh biểu đồ tại 20
+    ticks: {
+    stepSize: 2, // Chia bước nhảy cho đồng bộ với các biểu đồ khác
+    precision: 0
+    }
+    }
+    }
+    }
+    });
+    }
+    // options: {
+    // scales: {
+    // y: {
+    // beginAtZero: true,
+    // min: 0,        Bắt đầu từ 0
+    // max: 20,       Cố định đỉnh biểu đồ tại 20
+    // ticks: {
+    // stepSize: 2 Chia bước nhảy cho đẹp (0, 2, 4... 20)
+    // }
+    // }
+    // }
+    // }
+    let showtimeChart;
 
+    async function loadShowtimeChart() {
+    const mId = document.getElementById("showtimeMovieSelect").value;
+    const tId2 = document.getElementById("showtimeTheaterSelect").value;
+
+    const res = await fetch(`/Statistics/GetShowtimeTicketData?mId=${mId}&tId2=${tId2}`);
+    const data = await res.json();
+
+    if (showtimeChart) showtimeChart.destroy();
+
+    const ctx = document.getElementById("showtimeChart").getContext('2d');
+    showtimeChart = new Chart(ctx, {
+    type: 'line', // Sử dụng line để thấy xu hướng theo thời gian
+    data: {
+    labels: data.labels,
+    datasets: [{
+    label: 'Số vé bán ra',
+    data: data.values,
+    borderColor: '#10b981',
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    fill: true,
+    tension: 0.3
+    }]
+    },
+    options: {
+    scales: {
+    y: {
+    beginAtZero: true,
+    min: 0,        // Bắt đầu từ 0
+    max: 20,       // Cố định đỉnh biểu đồ tại 20
+    ticks: {
+    stepSize: 2 // Chia bước nhảy cho đẹp (0, 2, 4... 20)
+    }
+    }
+    }
+    }
+    });
+    }
+
+    // Gọi hàm ngay khi load trang
+    window.addEventListener('load', loadShowtimeChart);
 
 </script>
 
