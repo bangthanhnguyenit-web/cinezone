@@ -118,30 +118,18 @@ namespace CINEMA.Controllers
             // =====================================================
             // 5. THỐNG KÊ PHIM & DOANH THU PHIM (Gộp chi tiết Local & Top 5 Git)
             // =====================================================
-            var movieTicketStats = paidOrders
-                .SelectMany(o => o.Tickets)
-                .Where(t => t.Showtime != null && t.Showtime.Movie != null)
-                .GroupBy(t => t.Showtime.Movie.Title)
-                .Select(g => new {
-                    MovieTitle = g.Key,
-                    TicketCount = g.Count(),
-                    Revenue = g.Sum(x => x.Price) ?? 0
-                })
-                .ToList();
+            var comboData = await _context.OrderCombos
+                .Include(oc => oc.Order)
+                .Where(oc => oc.Order != null &&
+                             oc.Order.Status != null &&
+                             oc.Order.Status.ToLower().Contains("thanh toán"))
+                .ToListAsync();
 
-            if (movieTicketStats.Any())
-            {
-                // Danh hiệu chi tiết (Từ Local)
-                var topSell = movieTicketStats.OrderByDescending(x => x.TicketCount).First();
-                var leastSell = movieTicketStats.OrderBy(x => x.TicketCount).First();
-                var topRev = movieTicketStats.OrderByDescending(x => x.Revenue).First();
+            model.ComboRevenue = comboData.Sum(oc =>
+                (oc.UnitPrice ?? 0) * (oc.Quantity ?? 0));
 
-                model.TopSellingMovie = topSell.MovieTitle ?? "";
-                model.TopSellingTickets = topSell.TicketCount;
-                model.LeastSellingMovie = leastSell.MovieTitle ?? "";
-                model.LeastSellingTickets = leastSell.TicketCount;
-                model.TopRevenueMovie = topRev.MovieTitle ?? "";
-                model.TopRevenueAmount = topRev.Revenue;
+            model.ComboSold = comboData.Sum(oc =>
+                oc.Quantity ?? 0);
 
                 // Biểu đồ Top 5 Phim theo doanh thu (Từ Git)
                 var top5Movies = movieTicketStats.OrderByDescending(x => x.Revenue).Take(5).ToList();
@@ -172,13 +160,7 @@ namespace CINEMA.Controllers
             model.ComboRevenue = comboStats.Sum(x => x.Revenue); // Từ Git
             model.ComboSold = totalComboSold; // Từ Git
 
-            var bestCombo = comboStats.FirstOrDefault(); // Từ Git
-            if (bestCombo != null)
-            {
-                model.BestSellingCombo = bestCombo.ComboName;
-                model.BestSellingQuantity = bestCombo.QuantitySold;
-            }
-
+            // Bảng thống kê
             foreach (var item in comboStats)
             {
                 model.ComboStatistics.Add(new ComboStatisticViewModel
@@ -189,9 +171,37 @@ namespace CINEMA.Controllers
                     Percentage = totalComboSold == 0 ? 0 : Math.Round(item.QuantitySold * 100.0 / totalComboSold, 2) // Từ Git
                 });
 
-                // Dữ liệu Pie Chart (Từ Git)
-                model.ComboPieLabels.Add(item.ComboName ?? "");
-                model.ComboPieValues.Add(item.QuantitySold);
+            // Combo bán chạy nhất
+            var bestCombo = comboStats.FirstOrDefault();
+
+            if (bestCombo != null)
+            {
+                model.BestSellingCombo =
+                    bestCombo.ComboName;
+
+                model.BestSellingQuantity =
+                    bestCombo.QuantitySold;
+            }
+            //có rồi 
+            // =====================================================
+            // 🔥 KPI COMBO NÂNG CAO
+            // =====================================================
+
+            var totalPaidOrders =
+                await paidOrders.CountAsync();
+
+            var ordersWithCombo =
+                await paidOrders.CountAsync(o =>
+                    o.OrderCombos.Any());
+
+            // Pie chart
+            foreach (var item in comboStats)
+            {
+                model.ComboPieLabels.Add(
+                    item.ComboName ?? "");
+
+                model.ComboPieValues.Add(
+                    item.QuantitySold);
             }
 
             // =====================================================

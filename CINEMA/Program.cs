@@ -34,7 +34,7 @@ namespace CINEMA
             {
                 options.LoginPath = "/Customer/Login";
             })
-           ;
+            ;
 
             var app = builder.Build();
 

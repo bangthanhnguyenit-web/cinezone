@@ -91,9 +91,7 @@ namespace CINEMA.ViewModels
         public List<decimal> ComboRevenueByMonth { get; set; } = new();
         public List<int> ComboQuantityByMonth { get; set; } = new();
 
-        // ==========================================
-        // 5. RẠP & SUẤT CHIẾU (TỪ BẢN GIT - NÂNG CAO)
-        // ==========================================
+        // Thêm vào RevenueDashboardViewModel.cs
         public List<string> CinemaLabels { get; set; } = new();
         public List<decimal> CinemaRevenue { get; set; } = new();
 
@@ -105,7 +103,31 @@ namespace CINEMA.ViewModels
         public double GlobalOccupancyRate { get; set; }
         public int? SelectedTheaterId { get; set; }
         public List<CINEMA.Models.Ticket> Tickets { get; set; } = new();
-    }
+
+
+
+        public List<string> MovieTicketLabels { get; set; } = new();
+        public List<int> TicketsByMovie { get; set; } = new();
+
+        // =========================
+        // THỐNG KÊ COMBO CHI TIẾT
+        // =========================
+
+        public List<ComboStatisticViewModel> ComboStatistics { get; set; }
+            = new();
+
+        public string? BestSellingCombo { get; set; }
+
+        public int BestSellingQuantity { get; set; }
+
+        public List<string> ComboPieLabels { get; set; }
+            = new();
+
+        public List<int> ComboPieValues { get; set; }
+            = new();
+        // =========================
+        // DOANH THU THEO SUẤT CHIẾU
+        // =========================
 
     // =====================================================
     // 🔹 CLASS PHỤ THỂ LOẠI (Đã dọn dẹp lỗi lồng danh sách)
