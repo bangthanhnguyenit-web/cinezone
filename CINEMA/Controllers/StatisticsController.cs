@@ -87,18 +87,18 @@ namespace CINEMA.Controllers
             // =====================================================
             // 🔹 Combo bắp nước tổng
             // =====================================================
-            var comboData = await _context.OrderCombos
-                .Include(oc => oc.Order)
-                .Where(oc => oc.Order != null &&
-                             oc.Order.Status != null &&
-                             oc.Order.Status.ToLower().Contains("thanh toán"))
+
+            var comboData = await paidOrders
+                .SelectMany(o => o.OrderCombos)
                 .ToListAsync();
 
-            model.ComboRevenue = comboData.Sum(oc =>
-                (oc.UnitPrice ?? 0) * (oc.Quantity ?? 0));
+            // Tổng doanh thu combo
+            model.ComboRevenue = comboData.Sum(x =>
+                (x.UnitPrice ?? 0) * (x.Quantity ?? 0));
 
-            model.ComboSold = comboData.Sum(oc =>
-                oc.Quantity ?? 0);
+            // Tổng số lượng combo bán
+            model.ComboSold = comboData.Sum(x =>
+                x.Quantity ?? 0);
 
             // =====================================================
             // 🔥 THỐNG KÊ CHI TIẾT COMBO
@@ -128,7 +128,10 @@ namespace CINEMA.Controllers
 
             var totalComboSold = comboStats.Sum(x => x.QuantitySold);
 
-            // Bảng thống kê
+            // =====================================================
+            // 🔥 ĐỔ DỮ LIỆU RA BẢNG
+            // =====================================================
+
             foreach (var item in comboStats)
             {
                 model.ComboStatistics.Add(
@@ -149,8 +152,24 @@ namespace CINEMA.Controllers
                     });
             }
 
-            // Combo bán chạy nhất
+            // =====================================================
+            // 🔥 COMBO BÁN CHẠY NHẤT
+            // =====================================================
+
             var bestCombo = comboStats.FirstOrDefault();
+
+            var worstCombo = comboStats
+    .OrderBy(x => x.QuantitySold)
+    .FirstOrDefault();
+
+            if (worstCombo != null)
+            {
+                model.WorstSellingCombo =
+                    worstCombo.ComboName;
+
+                model.WorstSellingQuantity =
+                    worstCombo.QuantitySold;
+            }
 
             if (bestCombo != null)
             {
@@ -160,8 +179,81 @@ namespace CINEMA.Controllers
                 model.BestSellingQuantity =
                     bestCombo.QuantitySold;
             }
+            //có rồi 
+            // =====================================================
+            // 🔥 KPI COMBO NÂNG CAO
+            // =====================================================
 
-            // Pie chart
+            var totalPaidOrders =
+                await paidOrders.CountAsync();
+
+            var ordersWithCombo =
+                await paidOrders.CountAsync(o =>
+                    o.OrderCombos.Any());
+
+            // Tỷ lệ đơn có mua combo
+            model.ComboAttachRate =
+                totalPaidOrders == 0
+                    ? 0
+                    : Math.Round(
+                        ordersWithCombo * 100.0 /
+                        totalPaidOrders,
+                        2);
+
+            // Tỷ trọng doanh thu combo
+            model.ComboRevenueRate =
+                model.TotalRevenue == 0
+                    ? 0
+                    : Math.Round(
+                        (double)(
+                            model.ComboRevenue /
+                            model.TotalRevenue * 100),
+                        2);
+
+            // Chi tiêu combo trung bình mỗi đơn
+            model.AverageComboPerOrder =
+                ordersWithCombo == 0
+                    ? 0
+                    : Math.Round(
+                        model.ComboRevenue /
+                        ordersWithCombo,
+                        0);
+
+            // =====================================================
+            // 🔥 TOP 5 COMBO BÁN CHẠY
+            // =====================================================
+
+            foreach (var item in comboStats.Take(5))
+            {
+                model.TopComboLabels.Add(
+                    item.ComboName ?? "");
+
+                model.TopComboValues.Add(
+                    item.QuantitySold);
+            }
+
+            // =====================================================
+            // 🔥 TOP 5 COMBO DOANH THU CAO
+            // =====================================================
+
+            var topRevenueCombos = comboStats
+                .OrderByDescending(x => x.Revenue)
+                .Take(5)
+                .ToList();
+
+            foreach (var item in topRevenueCombos)
+            {
+                model.TopRevenueComboLabels.Add(
+                    item.ComboName ?? "");
+
+                model.TopRevenueComboValues.Add(
+                    item.Revenue);
+            }
+
+            // =====================================================
+            // 🔥 PIE CHART COMBO
+            // =====================================================
+
             foreach (var item in comboStats)
             {
                 model.ComboPieLabels.Add(
@@ -170,6 +262,7 @@ namespace CINEMA.Controllers
                 model.ComboPieValues.Add(
                     item.QuantitySold);
             }
+                 
 
             // =====================================================
             // 🔹 Doanh thu & vé theo từng ngày

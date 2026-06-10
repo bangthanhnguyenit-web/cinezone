@@ -46,6 +46,7 @@ namespace CINEMA.ViewModels
         public List<int> TicketCountByYear { get; set; } = new();
 
 
+
         // Thêm vào RevenueDashboardViewModel.cs
         public List<string> CinemaLabels { get; set; } = new();
         public List<decimal> CinemaRevenue { get; set; } = new();
@@ -74,11 +75,38 @@ namespace CINEMA.ViewModels
 
         public int BestSellingQuantity { get; set; }
 
+        public string? WorstSellingCombo { get; set; }
+
+        public int WorstSellingQuantity { get; set; }
+
         public List<string> ComboPieLabels { get; set; }
             = new();
 
         public List<int> ComboPieValues { get; set; }
             = new();
+
+        // =========================
+        // KPI COMBO NÂNG CAO
+        // =========================
+
+        // Tỷ lệ đơn hàng có mua combo
+        public double ComboAttachRate { get; set; }
+
+        // Tỷ trọng doanh thu combo trong tổng doanh thu
+        public double ComboRevenueRate { get; set; }
+
+        // Chi tiêu combo trung bình trên mỗi đơn có combo
+        public decimal AverageComboPerOrder { get; set; }
+
+        // Top 5 combo bán chạy
+        public List<string> TopComboLabels { get; set; } = new();
+
+        public List<int> TopComboValues { get; set; } = new();
+
+        // Top 5 combo doanh thu cao nhất
+        public List<string> TopRevenueComboLabels { get; set; } = new();
+
+        public List<decimal> TopRevenueComboValues { get; set; } = new();
         // =========================
         // DOANH THU THEO SUẤT CHIẾU
         // =========================
