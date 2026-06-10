@@ -2,6 +2,8 @@
 using CINEMA.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System.Text;
 
 namespace CINEMA.Controllers
 {
@@ -20,20 +22,32 @@ namespace CINEMA.Controllers
         // ====================== TRANG CHỦ ====================
         // =====================================================
         [HttpGet]
+        [HttpGet]
         public IActionResult Search(string keyword)
         {
-            if (string.IsNullOrEmpty(keyword))
+            if (string.IsNullOrWhiteSpace(keyword))
                 return RedirectToAction("Index");
 
             var today = DateOnly.FromDateTime(DateTime.Today);
 
+            var keywordNoSign = RemoveDiacritics(keyword);
+
             var movies = _context.Movies
+                .AsEnumerable()
                 .Where(m =>
                     m.ReleaseDate.HasValue &&
                     m.ReleaseDate.Value <= today &&
-                    m.Title.ToLower().Contains(keyword.ToLower())
-                )
+                    RemoveDiacritics(m.Title ?? "")
+                        .Contains(keywordNoSign))
                 .ToList();
+            if (!movies.Any())
+            {
+                ViewBag.SuggestMovies = _context.Movies
+                    .Where(m => m.IsActive == true)
+                    .OrderByDescending(m => m.ReleaseDate)
+                    .Take(4)
+                    .ToList();
+            }
 
             ViewBag.Keyword = keyword;
 
@@ -406,6 +420,28 @@ namespace CINEMA.Controllers
                 success = true,
                 discount = discount
             });
+        }
+        private string RemoveDiacritics(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return "";
+
+            var normalized = text.Normalize(NormalizationForm.FormD);
+            var sb = new StringBuilder();
+
+            foreach (char c in normalized)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c)
+                    != UnicodeCategory.NonSpacingMark)
+                {
+                    sb.Append(c);
+                }
+            }
+
+            return sb.ToString()
+                     .Replace('đ', 'd')
+                     .Replace('Đ', 'D')
+                     .ToLower();
         }
     }
 }

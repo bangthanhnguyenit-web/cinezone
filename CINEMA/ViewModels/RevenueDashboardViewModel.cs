@@ -6,7 +6,7 @@ namespace CINEMA.ViewModels
     public class RevenueDashboardViewModel
     {
         // ==========================================
-        // 1. TỔNG QUAN (Git + Local)
+        // 1. TỔNG QUAN & KPI TRUNG BÌNH ĐƠN (AOV)
         // ==========================================
         public decimal TotalRevenue { get; set; }
         public int TotalTickets { get; set; }
@@ -20,7 +20,7 @@ namespace CINEMA.ViewModels
         public DateTime? FromDate { get; set; }
         public DateTime? ToDate { get; set; }
 
-        // --- KPI Trung bình đơn (AOV) từ Local ---
+        // --- KPI Giá trị đơn hàng trung bình (AOV) ---
         public decimal AvgOrderValue { get; set; }
         public decimal AvgOrderValueToday { get; set; }
         public decimal AvgOrderValueMonth { get; set; }
@@ -41,7 +41,7 @@ namespace CINEMA.ViewModels
         public List<string> LabelsByDate { get; set; } = new();
         public List<decimal> RevenueByDate { get; set; } = new();
         public List<int> TicketCountByDate { get; set; } = new();
-        public List<int> OrderCountByDate { get; set; } = new(); // Local: Đếm số đơn
+        public List<int> OrderCountByDate { get; set; } = new();
 
         // --- Theo tháng ---
         public List<string> LabelsByMonth { get; set; } = new();
@@ -61,7 +61,7 @@ namespace CINEMA.ViewModels
         public List<string> MovieTicketLabels { get; set; } = new();
         public List<int> TicketsByMovie { get; set; } = new();
 
-        // --- Danh hiệu từ Local ---
+        // --- Danh hiệu hiệu năng phim ---
         public string TopSellingMovie { get; set; } = string.Empty;
         public int TopSellingTickets { get; set; }
         public string LeastSellingMovie { get; set; } = string.Empty;
@@ -69,29 +69,45 @@ namespace CINEMA.ViewModels
         public string TopRevenueMovie { get; set; } = string.Empty;
         public decimal TopRevenueAmount { get; set; }
 
-        // --- Trạng thái phim & Thể loại (Local) ---
+        // --- Trạng thái phim & Thể loại ---
         public int NowShowingCount { get; set; }
         public int ComingSoonCount { get; set; }
         public List<GenreStatisticViewModel> GenreStatistics { get; set; } = new();
 
         // ==========================================
-        // 4. THỐNG KÊ COMBO CHI TIẾT
+        // 4. THỐNG KÊ COMBO CHI TIẾT & KPI NÂNG CAO
         // ==========================================
         public decimal ComboRevenue { get; set; }
         public int ComboSold { get; set; }
+
+        // --- Danh hiệu Combo ---
         public string? BestSellingCombo { get; set; }
         public int BestSellingQuantity { get; set; }
+        public string? WorstSellingCombo { get; set; }
+        public int WorstSellingQuantity { get; set; }
 
+        // --- KPI hiệu suất bán Combo ---
+        public double ComboAttachRate { get; set; }         // Tỷ lệ đơn hàng có mua combo
+        public double ComboRevenueRate { get; set; }        // Tỷ trọng doanh thu combo trong tổng doanh thu
+        public decimal AverageComboPerOrder { get; set; }    // Chi tiêu combo trung bình trên mỗi đơn hàng
+
+        // --- Danh sách / Biểu đồ Combo ---
         public List<ComboStatisticViewModel> ComboStatistics { get; set; } = new();
-
         public List<string> ComboPieLabels { get; set; } = new();
         public List<int> ComboPieValues { get; set; } = new();
-
         public List<string> ComboLabelsByMonth { get; set; } = new();
         public List<decimal> ComboRevenueByMonth { get; set; } = new();
         public List<int> ComboQuantityByMonth { get; set; } = new();
 
-        // Thêm vào RevenueDashboardViewModel.cs
+        // --- Top 5 dữ liệu vẽ biểu đồ ---
+        public List<string> TopComboLabels { get; set; } = new();
+        public List<int> TopComboValues { get; set; } = new();
+        public List<string> TopRevenueComboLabels { get; set; } = new();
+        public List<decimal> TopRevenueComboValues { get; set; } = new();
+
+        // ==========================================
+        // 5. RẠP & SUẤT CHIẾU (NÂNG CAO)
+        // ==========================================
         public List<string> CinemaLabels { get; set; } = new();
         public List<decimal> CinemaRevenue { get; set; } = new();
 
@@ -99,38 +115,37 @@ namespace CINEMA.ViewModels
         public List<string> ShowtimeLabels { get; set; } = new();
         public List<int> TicketsByShowtime { get; set; } = new();
         public List<decimal> RevenueByShowtime { get; set; } = new();
+        public int TotalVouchers { get; set; }
 
+        public int ActiveVouchers { get; set; }
+
+        public int ExpiredVouchers { get; set; }
+
+        public int UsedVouchers { get; set; }
+
+        public decimal TotalDiscountAmount { get; set; }
+
+        public double VoucherUsageRate { get; set; }
+
+        public List<string> VoucherLabels { get; set; } = new();
+
+        public List<int> VoucherValues { get; set; } = new();
+        public List<VoucherStatisticViewModel> VoucherStatistics { get; set; } = new();
+        public string BestVoucher { get; set; } = "";
+
+        public int BestVoucherUsage { get; set; }
+        public decimal VoucherRevenue { get; set; }
+
+        public List<decimal> VoucherRevenueValues { get; set; } = new();
+
+        // --- Tỷ lệ lấp đầy rạp ---
         public double GlobalOccupancyRate { get; set; }
         public int? SelectedTheaterId { get; set; }
         public List<CINEMA.Models.Ticket> Tickets { get; set; } = new();
-
-
-
-        public List<string> MovieTicketLabels { get; set; } = new();
-        public List<int> TicketsByMovie { get; set; } = new();
-
-        // =========================
-        // THỐNG KÊ COMBO CHI TIẾT
-        // =========================
-
-        public List<ComboStatisticViewModel> ComboStatistics { get; set; }
-            = new();
-
-        public string? BestSellingCombo { get; set; }
-
-        public int BestSellingQuantity { get; set; }
-
-        public List<string> ComboPieLabels { get; set; }
-            = new();
-
-        public List<int> ComboPieValues { get; set; }
-            = new();
-        // =========================
-        // DOANH THU THEO SUẤT CHIẾU
-        // =========================
+    }
 
     // =====================================================
-    // 🔹 CLASS PHỤ THỂ LOẠI (Đã dọn dẹp lỗi lồng danh sách)
+    // 🔹 CLASS PHỤ THỂ LOẠI (Đã dọn dẹp chuẩn chỉnh)
     // =====================================================
     public class GenreStatisticViewModel
     {
@@ -138,4 +153,5 @@ namespace CINEMA.ViewModels
         public int MovieCount { get; set; }
         public double Percentage { get; set; }
     }
+
 }

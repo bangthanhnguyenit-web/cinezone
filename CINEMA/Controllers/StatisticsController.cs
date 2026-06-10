@@ -1,10 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CINEMA.Models;
+using CINEMA.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using CINEMA.Models;
-using CINEMA.ViewModels;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using static CINEMA.ViewModels.RevenueDashboardViewModel;
 
 namespace CINEMA.Controllers
 {
@@ -27,7 +28,7 @@ namespace CINEMA.Controllers
         }
 
         // ============================
-        //  HÀM XỬ LÝ THỐNG KÊ GỘP (GIT + LOCAL)
+        //  HÀM XỬ LÝ THỐNG KÊ GỘP CHUẨN (GIT + LOCAL)
         // ============================
         public async Task<RevenueDashboardViewModel> BuildDashboard(DateTime? from, DateTime? to)
         {
@@ -42,7 +43,7 @@ namespace CINEMA.Controllers
             var lastMonthStart = startOfMonth.AddMonths(-1);
 
             // =====================================================
-            // 1. LẤY ĐƠN HÀNG ĐÃ THANH TOÁN (Kéo về bộ nhớ để tính toán nhiều tiêu chí)
+            // 1. LẤY ĐƠN HÀNG ĐÃ THANH TOÁN (Kéo về bộ nhớ tối ưu hóa)
             // =====================================================
             var paidOrdersQuery = _context.Orders
                 .Include(o => o.Tickets)
@@ -50,10 +51,12 @@ namespace CINEMA.Controllers
                         .ThenInclude(s => s.Movie)
                 .Include(o => o.Tickets)
                     .ThenInclude(t => t.Showtime)
-                        .ThenInclude(s => s.Auditorium) // Từ Git
+                        .ThenInclude(s => s.Auditorium)
                 .Include(o => o.OrderCombos)
                     .ThenInclude(oc => oc.Combo)
-                .Where(o => o.Status != null && o.Status.ToLower().Contains("thanh toán") && o.CreatedAt != null);
+                .Where(o => o.Status != null &&
+                            o.Status.ToLower().Contains("thanh toán") &&
+                            o.CreatedAt != null);
 
             if (from.HasValue)
                 paidOrdersQuery = paidOrdersQuery.Where(o => o.CreatedAt >= from.Value.Date);
@@ -67,7 +70,7 @@ namespace CINEMA.Controllers
             var paidOrders = await paidOrdersQuery.ToListAsync();
 
             // =====================================================
-            // 2. TỔNG DOANH THU & KPI (Từ Local & Git)
+            // 2. TỔNG DOANH THU & KPI SỐ LƯỢNG VÉ
             // =====================================================
             model.TotalRevenue = paidOrders.Sum(o => (decimal?)o.TotalAmount) ?? 0;
             model.TotalTickets = paidOrders.SelectMany(o => o.Tickets).Count();
@@ -79,17 +82,17 @@ namespace CINEMA.Controllers
             model.RevenueLastMonth = paidOrders.Where(o => o.CreatedAt >= lastMonthStart && o.CreatedAt < startOfMonth).Sum(o => (decimal?)o.TotalAmount) ?? 0;
 
             // =====================================================
-            // 3. THỐNG KÊ HÔM NAY, THÁNG NÀY & TRUNG BÌNH ĐƠN
+            // 3. THỐNG KÊ HÔM NAY, THÁNG NÀY & TRUNG BÌNH ĐƠN CHI TIẾT
             // =====================================================
             var todayOrders = paidOrders.Where(o => o.CreatedAt!.Value.Date == today).ToList();
             model.TodayRevenue = todayOrders.Sum(o => (decimal?)o.TotalAmount) ?? 0;
-            model.TodayTickets = todayOrders.SelectMany(o => o.Tickets).Count(); // Từ Git
+            model.TodayTickets = todayOrders.SelectMany(o => o.Tickets).Count();
 
             var monthOrders = paidOrders.Where(o => o.CreatedAt!.Value >= startOfMonth).ToList();
             model.MonthRevenue = monthOrders.Sum(o => (decimal?)o.TotalAmount) ?? 0;
-            model.MonthTickets = monthOrders.SelectMany(o => o.Tickets).Count(); // Từ Git
+            model.MonthTickets = monthOrders.SelectMany(o => o.Tickets).Count();
 
-            // KPI Trung bình đơn (Từ Local)
+            // KPI Trung bình đơn (Local)
             model.AvgOrderValueToday = todayOrders.Any() ? todayOrders.Average(o => (decimal?)o.TotalAmount ?? 0) : 0;
             model.AvgOrderValueMonth = monthOrders.Any() ? monthOrders.Average(o => (decimal?)o.TotalAmount ?? 0) : 0;
 
@@ -101,7 +104,7 @@ namespace CINEMA.Controllers
             model.AvgOrderValueYear = yearOrders.Any() ? yearOrders.Average(o => (decimal?)o.TotalAmount ?? 0) : 0;
 
             // =====================================================
-            // 4. SỐ LƯỢNG ĐƠN HÀNG TOÀN BỘ TRẠNG THÁI (Gộp Git & Local)
+            // 4. SỐ LƯỢNG ĐƠN HÀNG TOÀN BỘ TRẠNG THÁI
             // =====================================================
             var allOrdersQuery = _context.Orders.AsQueryable();
             if (from.HasValue) allOrdersQuery = allOrdersQuery.Where(o => o.CreatedAt >= from.Value.Date);
@@ -113,25 +116,37 @@ namespace CINEMA.Controllers
 
             model.PaidOrders = await allOrdersQuery.CountAsync(o => o.Status != null && o.Status.ToLower().Contains("thanh toán"));
             model.PendingOrders = await allOrdersQuery.CountAsync(o => o.Status != null && o.Status.ToLower().Contains("chờ"));
-            model.CancelledOrders = await allOrdersQuery.CountAsync(o => o.Status != null && (o.Status.ToLower().Contains("hủy") || o.Status.ToLower().Contains("thất bại"))); // Từ Git
+            model.CancelledOrders = await allOrdersQuery.CountAsync(o => o.Status != null && (o.Status.ToLower().Contains("hủy") || o.Status.ToLower().Contains("thất bại")));
 
             // =====================================================
-            // 5. THỐNG KÊ PHIM & DOANH THU PHIM (Gộp chi tiết Local & Top 5 Git)
+            // 5. THỐNG KÊ PHIM & DOANH THU PHIM CHUYÊN SÂU
             // =====================================================
-            var comboData = await _context.OrderCombos
-                .Include(oc => oc.Order)
-                .Where(oc => oc.Order != null &&
-                             oc.Order.Status != null &&
-                             oc.Order.Status.ToLower().Contains("thanh toán"))
-                .ToListAsync();
+            var movieTicketStats = paidOrders
+                .SelectMany(o => o.Tickets)
+                .Where(t => t.Showtime != null && t.Showtime.Movie != null)
+                .GroupBy(t => t.Showtime.Movie.Title)
+                .Select(g => new {
+                    MovieTitle = g.Key,
+                    TicketCount = g.Count(),
+                    Revenue = g.Sum(x => x.Price) ?? 0
+                })
+                .ToList();
 
-            model.ComboRevenue = comboData.Sum(oc =>
-                (oc.UnitPrice ?? 0) * (oc.Quantity ?? 0));
+            if (movieTicketStats.Any())
+            {
+                // Tìm kiếm các danh hiệu Phim từ dữ liệu Local
+                var topSell = movieTicketStats.OrderByDescending(x => x.TicketCount).First();
+                var leastSell = movieTicketStats.OrderBy(x => x.TicketCount).First();
+                var topRev = movieTicketStats.OrderByDescending(x => x.Revenue).First();
 
-            model.ComboSold = comboData.Sum(oc =>
-                oc.Quantity ?? 0);
+                model.TopSellingMovie = topSell.MovieTitle ?? "";
+                model.TopSellingTickets = topSell.TicketCount;
+                model.LeastSellingMovie = leastSell.MovieTitle ?? "";
+                model.LeastSellingTickets = leastSell.TicketCount;
+                model.TopRevenueMovie = topRev.MovieTitle ?? "";
+                model.TopRevenueAmount = topRev.Revenue;
 
-                // Biểu đồ Top 5 Phim theo doanh thu (Từ Git)
+                // Nạp biểu đồ Top 5 Phim theo doanh thu từ Git
                 var top5Movies = movieTicketStats.OrderByDescending(x => x.Revenue).Take(5).ToList();
                 foreach (var mv in top5Movies)
                 {
@@ -142,7 +157,7 @@ namespace CINEMA.Controllers
             }
 
             // =====================================================
-            // 6. THỐNG KÊ COMBO (Gộp biểu đồ Git & bảng Local)
+            // 6. THỐNG KÊ COMBO & KPI ĐÍNH KÈM NÂNG CAO
             // =====================================================
             var comboStats = paidOrders
                 .SelectMany(o => o.OrderCombos)
@@ -157,10 +172,26 @@ namespace CINEMA.Controllers
                 .ToList();
 
             var totalComboSold = comboStats.Sum(x => x.QuantitySold);
-            model.ComboRevenue = comboStats.Sum(x => x.Revenue); // Từ Git
-            model.ComboSold = totalComboSold; // Từ Git
+            model.ComboRevenue = comboStats.Sum(x => x.Revenue);
+            model.ComboSold = totalComboSold;
 
-            // Bảng thống kê
+            // Thiết lập Combo bán chạy nhất và bán chạy nhất số lượng
+            var bestCombo = comboStats.FirstOrDefault();
+            if (bestCombo != null)
+            {
+                model.BestSellingCombo = bestCombo.ComboName;
+                model.BestSellingQuantity = bestCombo.QuantitySold;
+            }
+
+            // Thiết lập Combo bán ế nhất từ Git gốc
+            var worstCombo = comboStats.OrderBy(x => x.QuantitySold).FirstOrDefault();
+            if (worstCombo != null)
+            {
+                model.WorstSellingCombo = worstCombo.ComboName;
+                model.WorstSellingQuantity = worstCombo.QuantitySold;
+            }
+
+            // Đổ dữ liệu ra cấu trúc bảng và cấu trúc hình tròn (Pie Chart)
             foreach (var item in comboStats)
             {
                 model.ComboStatistics.Add(new ComboStatisticViewModel
@@ -168,46 +199,46 @@ namespace CINEMA.Controllers
                     ComboName = item.ComboName ?? "",
                     QuantitySold = item.QuantitySold,
                     Revenue = item.Revenue,
-                    Percentage = totalComboSold == 0 ? 0 : Math.Round(item.QuantitySold * 100.0 / totalComboSold, 2) // Từ Git
+                    Percentage = totalComboSold == 0 ? 0 : Math.Round(item.QuantitySold * 100.0 / totalComboSold, 2)
                 });
 
-            // Combo bán chạy nhất
-            var bestCombo = comboStats.FirstOrDefault();
-
-            if (bestCombo != null)
-            {
-                model.BestSellingCombo =
-                    bestCombo.ComboName;
-
-                model.BestSellingQuantity =
-                    bestCombo.QuantitySold;
-            }
-            //có rồi 
-            // =====================================================
-            // 🔥 KPI COMBO NÂNG CAO
-            // =====================================================
-
-            var totalPaidOrders =
-                await paidOrders.CountAsync();
-
-            var ordersWithCombo =
-                await paidOrders.CountAsync(o =>
-                    o.OrderCombos.Any());
-
-            // Pie chart
-            foreach (var item in comboStats)
-            {
-                model.ComboPieLabels.Add(
-                    item.ComboName ?? "");
-
-                model.ComboPieValues.Add(
-                    item.QuantitySold);
+                model.ComboPieLabels.Add(item.ComboName ?? "");
+                model.ComboPieValues.Add(item.QuantitySold);
             }
 
+            // Thống kê bộ Chỉ số KPI Combo Nâng Cao
+            var ordersWithComboCount = paidOrders.Count(o => o.OrderCombos.Any());
+
+            model.ComboAttachRate = totalOrdersCount == 0
+                ? 0
+                : Math.Round(ordersWithComboCount * 100.0 / totalOrdersCount, 2);
+
+            model.ComboRevenueRate = model.TotalRevenue == 0
+                ? 0
+                : Math.Round((double)(model.ComboRevenue / model.TotalRevenue * 100), 2);
+
+            model.AverageComboPerOrder = ordersWithComboCount == 0
+                ? 0
+                : Math.Round(model.ComboRevenue / ordersWithComboCount, 0);
+
+            // Bổ sung dữ liệu Top 5 Combo bán chạy & Doanh thu cao cho Chart
+            foreach (var item in comboStats.Take(5))
+            {
+                model.TopComboLabels.Add(item.ComboName ?? "");
+                model.TopComboValues.Add(item.QuantitySold);
+            }
+
+            var topRevenueCombos = comboStats.OrderByDescending(x => x.Revenue).Take(5).ToList();
+            foreach (var item in topRevenueCombos)
+            {
+                model.TopRevenueComboLabels.Add(item.ComboName ?? "");
+                model.TopRevenueComboValues.Add(item.Revenue);
+            }
+
             // =====================================================
-            // 7. BIỂU ĐỒ THEO THỜI GIAN (Ngày, Tháng, Năm)
+            // 7. BIỂU ĐỒ THEO TIẾN TRÌNH THỜI GIAN (Ngày, Tháng, Năm)
             // =====================================================
-            // -- Theo Ngày (Có thêm OrderCount từ Local) --
+            // -- Thống kê tiến độ theo từng ngày --
             var dailyStats = paidOrders
                 .GroupBy(x => x.CreatedAt!.Value.Date)
                 .Select(g => new {
@@ -227,7 +258,7 @@ namespace CINEMA.Controllers
                 model.OrderCountByDate.Add(d.OrderCount);
             }
 
-            // -- Theo Tháng (Từ Git) --
+            // -- Thống kê tiến độ theo từng tháng --
             var monthlyStats = paidOrders
                 .GroupBy(x => new { x.CreatedAt!.Value.Year, x.CreatedAt.Value.Month })
                 .Select(g => new {
@@ -246,7 +277,7 @@ namespace CINEMA.Controllers
                 model.TicketCountByMonth.Add(m.Tickets);
             }
 
-            // -- Theo Năm (Từ Git) --
+            // -- Thống kê tiến độ theo từng năm (Lấy Top 5 năm) --
             var yearlyStats = paidOrders
                 .GroupBy(x => x.CreatedAt!.Value.Year)
                 .Select(g => new {
@@ -266,7 +297,7 @@ namespace CINEMA.Controllers
                 model.TicketCountByYear.Add(y.Tickets);
             }
 
-            // -- Combo theo tháng (Từ Git) --
+            // -- Doanh số Combo phát sinh theo từng tháng --
             var comboByMonth = paidOrders
                 .SelectMany(o => o.OrderCombos)
                 .Where(oc => oc.Order != null && oc.Order.CreatedAt != null)
@@ -288,7 +319,7 @@ namespace CINEMA.Controllers
             }
 
             // =====================================================
-            // 8. DOANH THU THEO SUẤT CHIẾU (Từ Git)
+            // 8. DOANH THU THEO TỪNG SUẤT CHIẾU CỤ THỂ
             // =====================================================
             var showtimeStats = paidOrders
                 .SelectMany(o => o.Tickets)
@@ -320,7 +351,7 @@ namespace CINEMA.Controllers
             }
 
             // =====================================================
-            // 9. THỐNG KÊ THỂ LOẠI & TÌNH TRẠNG PHIM (Từ Local)
+            // 9. THỐNG KÊ THỂ LOẠI & TÌNH TRẠNG PHIM HIỆN TẠI
             // =====================================================
             var todayDateOnly = DateOnly.FromDateTime(today);
             model.NowShowingCount = await _context.Movies.CountAsync(m => m.IsActive == true && m.ReleaseDate <= todayDateOnly);
@@ -348,14 +379,97 @@ namespace CINEMA.Controllers
                     });
                 }
             }
+            // =====================================================
+            // 🎟 THỐNG KÊ VOUCHER
+            // =====================================================
 
+            model.TotalVouchers =
+                await _context.Vouchers.CountAsync();
+
+            model.ActiveVouchers =
+                await _context.Vouchers.CountAsync(v =>
+                    v.IsActive &&
+                    (v.EndDate == null || v.EndDate >= DateTime.Now));
+
+            model.ExpiredVouchers =
+                await _context.Vouchers.CountAsync(v =>
+                    v.EndDate != null &&
+                    v.EndDate < DateTime.Now);
+
+            model.UsedVouchers =
+                await _context.Vouchers.SumAsync(v =>
+                    v.UsedCount);
+
+            model.TotalDiscountAmount =
+                await _context.Orders
+                    .Where(o => o.DiscountAmount != null)
+                    .SumAsync(o => o.DiscountAmount ?? 0);
+
+            var totalOrders =
+                await _context.Orders.CountAsync();
+
+            var voucherOrders =
+                await _context.Orders.CountAsync(o =>
+                    !string.IsNullOrEmpty(o.VoucherCode));
+
+            model.VoucherUsageRate =
+                totalOrders == 0
+                ? 0
+                : Math.Round(
+                    voucherOrders * 100.0 / totalOrders,
+                    2);
+
+            // Top voucher được dùng nhiều nhất
+            var topVoucherStats =
+                await _context.Orders
+                    .Where(o => !string.IsNullOrEmpty(o.VoucherCode))
+                    .GroupBy(o => o.VoucherCode)
+                    .Select(g => new
+                    {
+                        VoucherCode = g.Key,
+                        UsedCount = g.Count(),
+                        TotalDiscount =
+                            g.Sum(x => x.DiscountAmount ?? 0)
+                    })
+                    .OrderByDescending(x => x.UsedCount)
+                    .Take(5)
+                    .ToListAsync();
+
+            foreach (var item in topVoucherStats)
+            {
+                model.VoucherLabels.Add(
+                    item.VoucherCode ?? "");
+
+                model.VoucherValues.Add(
+                    item.UsedCount);
+
+                model.VoucherStatistics.Add(
+                    new VoucherStatisticViewModel
+                    {
+                        VoucherCode =
+                            item.VoucherCode ?? "",
+
+                        UsedCount =
+                            item.UsedCount,
+
+                        TotalDiscount =
+                            item.TotalDiscount,
+
+                        UsageRate =
+                            voucherOrders == 0
+                            ? 0
+                            : Math.Round(
+                                item.UsedCount * 100.0 /
+                                voucherOrders,
+                                2)
+                    });
+            }
             return model;
         }
 
         // =====================================================
-        // CÁC CHỨC NĂNG NÂNG CAO & API TỪ GIT 
+        // CÁC CHỨC NĂNG LỌC NÂNG CAO BIỂU ĐỒ & API JAVASCRIPT
         // =====================================================
-
         public async Task<IActionResult> AdvancedStats(int? tId, int? mId, int? tId2, DateTime? from, DateTime? to)
         {
             var model = await BuildDashboard(from, to);
@@ -372,14 +486,14 @@ namespace CINEMA.Controllers
             model.CinemaLabels = theaterStats.Select(x => x.Name ?? "N/A").ToList();
             model.CinemaRevenue = theaterStats.Select(x => (decimal)x.Count).ToList();
 
-            // --- LỌC BIỂU ĐỒ 2 (Suất chiếu) ---
+            // --- LỌC BIỂU ĐỒ 2 (Suất chiếu nâng cao) ---
             var query2 = _context.Tickets.Where(t => t.Order.Status.Contains("thanh toán"));
             if (mId.HasValue) query2 = query2.Where(t => t.Showtime.MovieId == mId.Value);
             if (tId2.HasValue) query2 = query2.Where(t => t.Showtime.Auditorium.TheaterId == tId2.Value);
 
             var advShowtimeStats = await query2.OrderByDescending(t => t.Showtime.StartTime).Take(10)
-                                            .GroupBy(t => new { t.Showtime.Movie.Title, t.Showtime.StartTime })
-                                            .Select(g => new { Info = $"{g.Key.Title} ({g.Key.StartTime:HH:mm})", Count = g.Count() }).ToListAsync();
+                                             .GroupBy(t => new { t.Showtime.Movie.Title, t.Showtime.StartTime })
+                                             .Select(g => new { Info = $"{g.Key.Title} ({g.Key.StartTime:HH:mm})", Count = g.Count() }).ToListAsync();
 
             model.ShowtimeLabels = advShowtimeStats.Select(x => x.Info).ToList();
             model.TicketsByShowtime = advShowtimeStats.Select(x => x.Count).ToList();

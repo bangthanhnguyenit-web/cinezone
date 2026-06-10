@@ -26,23 +26,23 @@
     </form>
 
     <!-- ================= DASHBOARD ================= -->
- <div class="row mb-3 justify-content-center">
-    <div class="col-md-6">
-        <div class="card-box">
-            <div class="label">📅 Khoảng lọc</div>
-            <div class="sub fw-semibold">
-                @if (Model.FromDate.HasValue || Model.ToDate.HasValue)
-                {
-                    <span>@Model.FromDate?.ToString("dd/MM/yyyy") - @Model.ToDate?.ToString("dd/MM/yyyy")</span>
-                }
-                else
-                {
-                    <span>Toàn thời gian</span>
-                }
+    <div class="row mb-3 justify-content-center">
+        <div class="col-md-6">
+            <div class="card-box">
+                <div class="label">📅 Khoảng lọc</div>
+                <div class="sub fw-semibold">
+                    @if (Model.FromDate.HasValue || Model.ToDate.HasValue)
+                    {
+                        <span>@Model.FromDate?.ToString("dd/MM/yyyy") - @Model.ToDate?.ToString("dd/MM/yyyy")</span>
+                    }
+                    else
+                    {
+                        <span>Toàn thời gian</span>
+                    }
+                </div>
             </div>
         </div>
     </div>
-</div>
     <!-- NAVBAR THỐNG KÊ -->
     <ul class="nav nav-pills justify-content-center mb-4 dashboard-nav">
 
@@ -54,13 +54,7 @@
             </a>
         </li>
 
-        <li class="nav-item">
-            <a class="nav-link"
-               data-bs-toggle="tab"
-               href="#ve">
-                🎟️ Doanh Thu Vé
-            </a>
-        </li>
+
 
         <li class="nav-item">
             <a class="nav-link"
@@ -92,9 +86,13 @@
                 📋 Chi Tiết
             </a>
         </li>
-
-    </ul>
-
+        <li class="nav-item">
+            <a class="nav-link"
+               data-bs-toggle="tab"
+               href="#voucher">
+                🎟 Voucher
+            </a>
+        </li>
     <div class="tab-content">
 
         <!-- ================= TỔNG QUAN ================= -->
@@ -242,41 +240,41 @@
         <div class="tab-pane fade" id="phim">
             <div class="chart-box">
                 <h5>🎬 Top phim doanh thu</h5>
-                     <div class="row g-3 mb-4 justify-content-center">
-                            <div class="col-md-3">
-                                <div class="card-box border-info">
-                                    <div class="label">Đang chiếu / Sắp chiếu</div>
-                                    <div class="value text-info">@Model.NowShowingCount / @Model.ComingSoonCount</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card-box border-primary">
-                                    <div class="label">Top bán chạy nhất</div>
-                                    <div class="value text-primary" style="font-size:16px">@Model.TopSellingMovie</div>
-                                    <div class="sub">@Model.TopSellingTickets vé</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card-box border-danger">
-                                    <div class="label">Bán ít nhất</div>
-                                    <div class="value text-danger" style="font-size:14px">@Model.LeastSellingMovie</div>
-                                    <div class="sub">@Model.LeastSellingTickets vé</div>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="card-box border-secondary">
-                                    <div class="label">Top doanh thu</div>
-                                    <div class="value text-secondary" style="font-size:16px">@Model.TopRevenueMovie</div>
-                                    <div class="sub">@Model.TopRevenueAmount.ToString("N0") ₫</div>
-                                </div>
-                             </div>
-                        <div class="row g-3 mb-4 justify-content-center">
-                            <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Hôm nay</div><div class="value text-primary">@Model.AvgOrderValueToday.ToString("N0") ₫</div></div></div>
-                            <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Tháng này</div><div class="value text-primary">@Model.AvgOrderValueMonth.ToString("N0") ₫</div></div></div>
-                            <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Quý này</div><div class="value text-primary">@Model.AvgOrderValueQuarter.ToString("N0") ₫</div></div></div>
-                            <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Năm nay</div><div class="value text-primary">@Model.AvgOrderValueYear.ToString("N0") ₫</div></div></div>
+                <div class="row g-3 mb-4 justify-content-center">
+                    <div class="col-md-3">
+                        <div class="card-box border-info">
+                            <div class="label">Đang chiếu / Sắp chiếu</div>
+                            <div class="value text-info">@Model.NowShowingCount / @Model.ComingSoonCount</div>
                         </div>
                     </div>
+                    <div class="col-md-3">
+                        <div class="card-box border-primary">
+                            <div class="label">Top bán chạy nhất</div>
+                            <div class="value text-primary" style="font-size:16px">@Model.TopSellingMovie</div>
+                            <div class="sub">@Model.TopSellingTickets vé</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card-box border-danger">
+                            <div class="label">Bán ít nhất</div>
+                            <div class="value text-danger" style="font-size:14px">@Model.LeastSellingMovie</div>
+                            <div class="sub">@Model.LeastSellingTickets vé</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card-box border-secondary">
+                            <div class="label">Top doanh thu</div>
+                            <div class="value text-secondary" style="font-size:16px">@Model.TopRevenueMovie</div>
+                            <div class="sub">@Model.TopRevenueAmount.ToString("N0") ₫</div>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-4 justify-content-center">
+                        <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Hôm nay</div><div class="value text-primary">@Model.AvgOrderValueToday.ToString("N0") ₫</div></div></div>
+                        <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Tháng này</div><div class="value text-primary">@Model.AvgOrderValueMonth.ToString("N0") ₫</div></div></div>
+                        <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Quý này</div><div class="value text-primary">@Model.AvgOrderValueQuarter.ToString("N0") ₫</div></div></div>
+                        <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Năm nay</div><div class="value text-primary">@Model.AvgOrderValueYear.ToString("N0") ₫</div></div></div>
+                    </div>
+                </div>
                 <div class="row g-4">
                     <div class="row g-4">
                         <div class="col-md-6">
@@ -291,19 +289,19 @@
                                 <canvas id="ticketComparisonChart"></canvas>
                             </div>
                         </div>
-                    <div class="col-md-6">
-                        <div class="chart-box">
-                            <h5>💰 Biểu đồ so sánh giá trị đơn (AOV)</h5>
-                            <div class="chart-container" style="height: 300px;"><canvas id="aovChart"></canvas></div>
+                        <div class="col-md-6">
+                            <div class="chart-box">
+                                <h5>💰 Biểu đồ so sánh giá trị đơn (AOV)</h5>
+                                <div class="chart-container" style="height: 300px;"><canvas id="aovChart"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-box">
+                                <h5>📊 So sánh doanh thu 2 tháng gần nhất</h5>
+                                <div class="chart-container" style="height: 300px;"><canvas id="monthCompareChart"></canvas></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="chart-box">
-                            <h5>📊 So sánh doanh thu 2 tháng gần nhất</h5>
-                            <div class="chart-container" style="height: 300px;"><canvas id="monthCompareChart"></canvas></div>
-                        </div>
-                    </div>
-                </div>
                 </div>
                 <canvas id="revenueByMovieChart"></canvas>
             </div>
@@ -600,27 +598,127 @@
             </div>
 
         </div>
+        <div class="tab-pane fade" id="voucher">
 
-    </div>
+            <div class="row g-3 mb-4">
 
-<!-- ================= JS ================= -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const labelsByDate = @Html.Raw(Json.Serialize(Model.LabelsByDate));
-    const revenueByDate = @Html.Raw(Json.Serialize(Model.RevenueByDate));
-    const ticketCountByDate = @Html.Raw(Json.Serialize(Model.TicketCountByDate));
+                <div class="col-md-4">
+                    <div class="card-box">
+                        <div class="label">
+                            Tổng giảm giá
+                        </div>
 
-    const labelsByMonth = @Html.Raw(Json.Serialize(Model.LabelsByMonth));
-    const revenueByMonth = @Html.Raw(Json.Serialize(Model.RevenueByMonth));
-    const ticketCountByMonth = @Html.Raw(Json.Serialize(Model.TicketCountByMonth));
+                        <div class="value text-danger">
+                            @Model.TotalDiscountAmount.ToString("N0") ₫
+                        </div>
+                    </div>
+                </div>
 
-    const labelsByYear = @Html.Raw(Json.Serialize(Model.LabelsByYear));
-    const revenueByYear = @Html.Raw(Json.Serialize(Model.RevenueByYear));
-    const ticketCountByYear = @Html.Raw(Json.Serialize(Model.TicketCountByYear));
+                <div class="col-md-4">
+                    <div class="card-box">
+                        <div class="label">
+                            Voucher phổ biến nhất
+                        </div>
 
-        const ticketsByMovie = @Html.Raw(Json.Serialize(Model.TicketsByMovie));
-    const movieLabels = @Html.Raw(Json.Serialize(Model.MovieLabels));
-    const revenueByMovie = @Html.Raw(Json.Serialize(Model.RevenueByMovie));
+                        <div class="value text-primary">
+                            @Model.BestVoucher
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card-box">
+                        <div class="label">
+                            Lượt sử dụng
+                        </div>
+
+                        <div class="value text-success">
+                            @Model.BestVoucherUsage
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+                <div class="card shadow border-0 mt-4 w-100">
+
+                    <div class="card-header">
+                        <h4 class="mb-0 fw-bold">
+                            🎟 Top Voucher được sử dụng nhiều nhất
+                        </h4>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div style="height:450px;">
+                            <canvas id="voucherChart"></canvas>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            <div class="card shadow border-0 mt-4">
+
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        📋 Chi tiết Voucher
+                    </h5>
+                </div>
+
+                <div class="card-body">
+
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Mã Voucher</th>
+                                <th>Lượt dùng</th>
+                                <th>Tổng giảm giá</th>
+                                <th>Tỷ lệ</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach (var item in Model.VoucherStatistics)
+                            {
+                                <tr>
+                                    <td>@item.VoucherCode</td>
+                                    <td>@item.UsedCount</td>
+                                    <td>@item.TotalDiscount.ToString("N0") ₫</td>
+                                    <td>@item.UsageRate %</td>
+                                </tr>
+                            }
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+        </div>
+
+
+    <!-- ================= JS ================= -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labelsByDate = @Html.Raw(Json.Serialize(Model.LabelsByDate));
+        const revenueByDate = @Html.Raw(Json.Serialize(Model.RevenueByDate));
+        const ticketCountByDate = @Html.Raw(Json.Serialize(Model.TicketCountByDate));
+
+        const labelsByMonth = @Html.Raw(Json.Serialize(Model.LabelsByMonth));
+        const revenueByMonth = @Html.Raw(Json.Serialize(Model.RevenueByMonth));
+        const ticketCountByMonth = @Html.Raw(Json.Serialize(Model.TicketCountByMonth));
+
+        const labelsByYear = @Html.Raw(Json.Serialize(Model.LabelsByYear));
+        const revenueByYear = @Html.Raw(Json.Serialize(Model.RevenueByYear));
+        const ticketCountByYear = @Html.Raw(Json.Serialize(Model.TicketCountByYear));
+
+        const movieLabels = @Html.Raw(Json.Serialize(Model.MovieLabels));
+        const revenueByMovie = @Html.Raw(Json.Serialize(Model.RevenueByMovie));
+        const ticketData = @Html.Raw(Json.Serialize(Model.TicketsByMovie));
         const showtimeLabels =
         @Html.Raw(Json.Serialize(Model.ShowtimeLabels));
 
@@ -630,126 +728,350 @@
         const comboPieLabels =
         @Html.Raw(Json.Serialize(Model.ComboPieLabels));
 
-    const comboPieValues =
+        const comboPieValues =
         @Html.Raw(Json.Serialize(Model.ComboPieValues));
 
-        const ctx = document.getElementById("ticketComparisonChart").getContext('2d');
 
-
-   function createChart(id, labels, data1, data2) {
-    new Chart(document.getElementById(id), {
+        function createChart(id, labels, data1, data2) {
+        new Chart(document.getElementById(id), {
         type: 'bar',
         data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Doanh thu',
-                    data: data1,
-                    yAxisID: 'y'
-                },
-                {
-                    label: 'Số vé',
-                    data: data2,
-                    type: 'line',
-                    yAxisID: 'y1'
-                }
-            ]
+        labels: labels,
+        datasets: [
+        {
+        label: 'Doanh thu',
+        data: data1,
+        yAxisID: 'y'
+        },
+        {
+        label: 'Số vé',
+        data: data2,
+        type: 'line',
+        yAxisID: 'y1'
+        }
+        ]
         },
         options: {
-            responsive: true
+        responsive: true
         }
-    });
-}
+        });
+        }
 
-    createChart("revenueByDateChart", labelsByDate, revenueByDate, ticketCountByDate);
-    createChart("revenueByMonthChart", labelsByMonth, revenueByMonth, ticketCountByMonth);
-    createChart("revenueByYearChart", labelsByYear, revenueByYear, ticketCountByYear);
+        createChart("revenueByDateChart", labelsByDate, revenueByDate, ticketCountByDate);
+        createChart("revenueByMonthChart", labelsByMonth, revenueByMonth, ticketCountByMonth);
+        createChart("revenueByYearChart", labelsByYear, revenueByYear, ticketCountByYear);
 
-    new Chart(document.getElementById("revenueByMovieChart"), {
+        new Chart(document.getElementById("revenueByMovieChart"), {
         type: 'pie',
         data: {
-            labels: movieLabels,
-            datasets: [{ data: revenueByMovie }]
+        labels: movieLabels,
+        datasets: [{ data: revenueByMovie }]
         }
-    });
+        });
 
-    new Chart(document.getElementById("comboPieChart"), {
+        new Chart(document.getElementById("comboPieChart"), {
 
         type: 'pie',
 
         data: {
 
-            labels: comboPieLabels,
+        labels: comboPieLabels,
 
-         datasets: [{
-                data: comboPieValues
-         }]
-      }
+        datasets: [{
+        data: comboPieValues
+        }]
+        }
 
-    });
-  new Chart(
-    document.getElementById("showtimeRevenueChart"),
-    {
+        });
+        new Chart(
+        document.getElementById("showtimeRevenueChart"),
+        {
         type: 'bar',
         data: {
-            labels: showtimeLabels,
-            datasets: [{
-                label: 'Doanh thu',
-                data: revenueByShowtime,
-                maxBarThickness: 60,
-                borderRadius: 6
-            }]
+        labels: showtimeLabels,
+        datasets: [{
+        label: 'Doanh thu',
+        data: revenueByShowtime,
+        maxBarThickness: 60,
+        borderRadius: 6
+        }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false
+        responsive: true,
+        maintainAspectRatio: false
         }
-    }
+        }
 
-);
-</script>
+        );
 
-<!-- ================= STYLE ================= -->
-<style>
-    body {
+        new Chart(document.getElementById('comboPie'), {
+        type: 'pie',
+        data: {
+        labels: @Html.Raw(Json.Serialize(Model.ComboPieLabels)),
+        datasets: [{
+        data: @Html.Raw(Json.Serialize(Model.ComboPieValues))
+        }]
+        }
+        });
+
+        const ctx = document.getElementById('topComboChart');
+
+        new Chart(ctx, {
+        type: 'bar',
+        data: {
+        labels: @Html.Raw(Json.Serialize(Model.TopComboLabels)),
+        datasets: [{
+        label: 'Số lượng bán',
+        data: @Html.Raw(Json.Serialize(Model.TopComboValues)),
+        borderWidth: 1
+        }]
+        },
+        options: {
+        responsive: true,
+        plugins: {
+        legend: {
+        display: false
+        },
+        title: {
+        display: false
+        }
+        },
+        scales: {
+        y: {
+        beginAtZero: true
+        }
+        }
+        }
+        });
+        const revenueCtx = document.getElementById('topRevenueComboChart');
+
+        new Chart(revenueCtx, {
+        type: 'bar',
+        data: {
+        labels: @Html.Raw(Json.Serialize(Model.TopRevenueComboLabels)),
+        datasets: [{
+        label: 'Doanh thu (VNĐ)',
+        data: @Html.Raw(Json.Serialize(Model.TopRevenueComboValues)),
+        borderWidth: 1
+        }]
+        },
+        options: {
+        responsive: true,
+        plugins: {
+        legend: {
+        display: false
+        },
+        tooltip: {
+        callbacks: {
+        label: function (context) {
+        return context.raw.toLocaleString('vi-VN') + ' ₫';
+        }
+        }
+        }
+        },
+        scales: {
+        y: {
+        beginAtZero: true,
+        ticks: {
+        callback: function (value) {
+        return value.toLocaleString('vi-VN');
+        }
+        }
+        }
+        }
+        }
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+
+        const ctx = document.getElementById('comboByMonthChart');
+
+        new Chart(ctx, {
+        type: 'bar',
+        data: {
+        labels: @Html.Raw(Json.Serialize(Model.ComboLabelsByMonth)),
+        datasets: [
+        {
+        label: 'Doanh thu combo (VNĐ)',
+        data: @Html.Raw(Json.Serialize(Model.ComboRevenueByMonth)),
+        type: 'bar'
+        }
+
+        ]
+        }
+        });
+
+        });
+        // 4. Biểu đồ Giá trị trung bình đơn (AOV)
+        new Chart(document.getElementById("aovChart"), {
+        type: 'bar',
+        data: {
+        labels: ['Hôm nay', 'Tháng này', 'Quý này', 'Năm nay'],
+        datasets: [{
+        label: 'Giá trị đơn trung bình (VND)',
+        data: [
+        @Model.AvgOrderValueToday,
+        @Model.AvgOrderValueMonth,
+        @Model.AvgOrderValueQuarter,
+        @Model.AvgOrderValueYear
+        ],
+        backgroundColor: [
+        'rgba(255, 99, 132, 0.7)',
+        'rgba(54, 162, 235, 0.7)',
+        'rgba(255, 206, 86, 0.7)',
+        'rgba(75, 192, 192, 0.7)'
+        ],
+        borderWidth: 1
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true } }
+        }
+        });
+
+        // 5. Biểu đồ so sánh doanh thu 2 tháng gần nhất
+        new Chart(document.getElementById("monthCompareChart"), {
+        type: 'bar',
+        data: {
+        labels: ['Tháng trước', 'Tháng này'],
+        datasets: [{
+        label: 'Doanh thu (VND)',
+        data: [@Model.RevenueLastMonth, @Model.RevenueCurrentMonth],
+        backgroundColor: [
+        'rgba(142, 142, 147, 0.7)',
+        'rgba(40, 167, 69, 0.7)'
+        ],
+        borderColor: [
+        'rgba(142, 142, 147, 1)',
+        'rgba(40, 167, 69, 1)'
+        ],
+        borderWidth: 1
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+        y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Số tiền (₫)' }
+        }
+        }
+        }
+        });
+        // Vẽ biểu đồ Doanh thu (Bar)
+        new Chart(document.getElementById("movieRevenueChart"), {
+        type: 'bar',
+        data: {
+        labels: movieLabels,
+        datasets: [{
+        label: 'Doanh thu (₫)',
+        data: revenueByMovie,
+        backgroundColor: '#0d6efd'
+        }]
+        },
+        options: { responsive: true }
+        });
+
+        new Chart(document.getElementById("ticketComparisonChart").getContext('2d'), {
+        type: 'bar',
+        data: {
+        labels: movieLabels,
+        datasets: [{
+        label: 'Số lượng vé',
+        data: ticketData,
+        backgroundColor: '#36a2eb',
+        borderRadius: 5
+        }]
+        },
+        options: {
+        responsive: true,
+        scales: {
+        y: {
+        beginAtZero: true,
+        ticks: { stepSize: 1 }
+        }
+        }
+        }
+        });
+        const voucherCtx =
+        document.getElementById('voucherChart');
+
+        if (voucherCtx) {
+        new Chart(voucherCtx, {
+        type: 'bar',
+        data: {
+        labels: @Html.Raw(Json.Serialize(Model.VoucherLabels)),
+        datasets: [{
+        label: 'Lượt sử dụng',
+        data: @Html.Raw(Json.Serialize(Model.VoucherValues))
+        }]
+        }
+        });
+        }
+        </script>
+    <!-- ================= STYLE ================= -->
+    <style>
+        body {
         background: linear-gradient(to right, #e3f2fd, #fde2e2);
-    }
+        }
 
-    .text-gradient {
+        .text-gradient {
         background: linear-gradient(90deg, #007bff, #6610f2);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-    }
+        }
 
-    .card-box {
+        .card-box {
         padding: 16px;
         border-radius: 16px;
         background: white;
         text-align: center;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
         transition: 0.3s;
-    }
+        }
 
-    .card-box:hover {
+        .card-box:hover {
         transform: translateY(-3px);
-    }
+        }
 
-    .label { font-size: 13px; color: #6c757d; }
-    .value { font-size: 22px; font-weight: bold; }
-    .sub { font-size: 13px; color: #999; }
+        .label {
+        font-size: 13px;
+        color: #6c757d;
+        }
 
-    .border-success { border-left: 5px solid #28a745; }
-    .border-warning { border-left: 5px solid #ffc107; }
-    .border-danger { border-left: 5px solid #dc3545; }
+        .value {
+        font-size: 22px;
+        font-weight: bold;
+        }
 
-    .chart-box {
+        .sub {
+        font-size: 13px;
+        color: #999;
+        }
+
+        .border-success {
+        border-left: 5px solid #28a745;
+        }
+
+        .border-warning {
+        border-left: 5px solid #ffc107;
+        }
+
+        .border-danger {
+        border-left: 5px solid #dc3545;
+        }
+
+        .chart-box {
         padding: 20px;
         border-radius: 16px;
         background: white;
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
+        }
 
-    canvas { max-height: 350px;
+        canvas {
+        max-height: 350px;
         height: auto !important;
         }
         /* Tạo hiệu ứng mượt mà khi hover vào chart-box giống như card-box */
@@ -771,162 +1093,164 @@
         border-bottom: 2px solid #f0f0f0;
         padding-bottom: 10px;
         }
-    .combo-card {
+
+        .combo-card {
         background: #f8f9fa;
         border-radius: 15px;
         padding: 20px;
         box-shadow: 0 3px 10px rgba(0,0,0,.08);
         height: 100%;
-    }
+        }
 
-    .combo-title {
+        .combo-title {
         font-size: 14px;
         color: #6c757d;
         margin-bottom: 10px;
-    }
-
-    .combo-value {
-        font-size: 28px;
-        font-weight: 700;
-    }
-    .dashboard-nav {
-    margin-top: 15px;
-}
-
-.dashboard-nav .nav-link {
-    border-radius: 50px;
-    padding: 10px 22px;
-    margin: 0 6px;
-    font-weight: 600;
-    color: #555;
-    background: white;
-    transition: .3s;
-}
-
-.dashboard-nav .nav-link.active {
-    background: linear-gradient(135deg,#0d6efd,#6610f2);
-    color: white !important;
-    box-shadow: 0 5px 15px rgba(13,110,253,.3);
-}
-
-        .kpi-card {
-            background: #fff;
-            border-radius: 16px;
-            padding: 18px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.06);
-            transition: 0.25s ease;
-            height: 100%;
         }
 
-            .kpi-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 10px 25px rgba(0,0,0,0.12);
-            }
+        .combo-value {
+        font-size: 28px;
+        font-weight: 700;
+        }
+
+        .dashboard-nav {
+        margin-top: 15px;
+        }
+
+        .dashboard-nav .nav-link {
+        border-radius: 50px;
+        padding: 10px 22px;
+        margin: 0 6px;
+        font-weight: 600;
+        color: #555;
+        background: white;
+        transition: .3s;
+        }
+
+        .dashboard-nav .nav-link.active {
+        background: linear-gradient(135deg,#0d6efd,#6610f2);
+        color: white !important;
+        box-shadow: 0 5px 15px rgba(13,110,253,.3);
+        }
+
+        .kpi-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 18px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+        transition: 0.25s ease;
+        height: 100%;
+        }
+
+        .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        }
 
         .kpi-header {
-            font-size: 14px;
-            color: #6c757d;
-            margin-bottom: 8px;
+        font-size: 14px;
+        color: #6c757d;
+        margin-bottom: 8px;
         }
 
         .kpi-value {
-            font-size: 26px;
-            font-weight: 700;
+        font-size: 26px;
+        font-weight: 700;
         }
 
         /* gradient soft cards */
         .kpi-card.soft.blue {
-            background: linear-gradient(135deg,#e3f2fd,#ffffff);
+        background: linear-gradient(135deg,#e3f2fd,#ffffff);
         }
 
         .kpi-card.soft.green {
-            background: linear-gradient(135deg,#e8f5e9,#ffffff);
+        background: linear-gradient(135deg,#e8f5e9,#ffffff);
         }
 
         .kpi-card.soft.yellow {
-            background: linear-gradient(135deg,#fff8e1,#ffffff);
+        background: linear-gradient(135deg,#fff8e1,#ffffff);
         }
 
         /* revenue / sold / best */
         .kpi-card.revenue {
-            border-left: 5px solid #28a745;
+        border-left: 5px solid #28a745;
         }
 
         .kpi-card.sold {
-            border-left: 5px solid #0d6efd;
+        border-left: 5px solid #0d6efd;
         }
 
         .kpi-card.best {
-            border-left: 5px solid #dc3545;
+        border-left: 5px solid #dc3545;
         }
 
         /* worst card */
         .kpi-alert {
-            background: #fff5f5;
-            border-left: 6px solid #dc3545;
-            border-radius: 16px;
-            padding: 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        background: #fff5f5;
+        border-left: 6px solid #dc3545;
+        border-radius: 16px;
+        padding: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         }
 
         .kpi-badge {
-            background: #dc3545;
-            color: white;
-            padding: 12px 16px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 18px;
+        background: #dc3545;
+        color: white;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-weight: bold;
+        font-size: 18px;
         }
 
-                .chart-card {
-                    background: #fff;
-                    border-radius: 18px;
-                    padding: 20px;
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-                    transition: 0.3s;
-                    height: 380px; /* 🔥 BỰ HƠN */
-                }
+        .chart-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        transition: 0.3s;
+        height: 380px; /* 🔥 BỰ HƠN */
+        }
 
-                    .chart-card:hover {
-                        transform: translateY(-5px);
-                        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-                    }
+        .chart-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+        }
 
-                    .chart-card h5 {
-                        font-weight: 700;
-                        margin-bottom: 15px;
-                    }
+        .chart-card h5 {
+        font-weight: 700;
+        margin-bottom: 15px;
+        }
 
-                /* ===== MÀU CARD ===== */
-                .chart-blue {
-                    border-top: 5px solid #0d6efd;
-                }
+        /* ===== MÀU CARD ===== */
+        .chart-blue {
+        border-top: 5px solid #0d6efd;
+        }
 
-                .chart-green {
-                    border-top: 5px solid #198754;
-                }
+        .chart-green {
+        border-top: 5px solid #198754;
+        }
 
-                .chart-orange {
-                    border-top: 5px solid #fd7e14;
-                }
+        .chart-orange {
+        border-top: 5px solid #fd7e14;
+        }
 
-                .chart-purple {
-                    border-top: 5px solid #6f42c1;
-                }
+        .chart-purple {
+        border-top: 5px solid #6f42c1;
+        }
 
-                /* TABLE */
-                .table-card {
-                    background: #fff;
-                    border-radius: 18px;
-                    padding: 20px;
-                    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-                    height: 380px;
-                    overflow: auto;
-                }
+        /* TABLE */
+        .table-card {
+        background: #fff;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+        height: 380px;
+        overflow: auto;
+        }
 
-                    .table-card h5 {
-                        font-weight: 700;
-                    }
-</style>
+        .table-card h5 {
+        font-weight: 700;
+        }
+    </style>
