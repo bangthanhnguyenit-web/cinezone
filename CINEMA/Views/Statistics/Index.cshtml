@@ -102,7 +102,6 @@
 
             <!-- Card doanh thu -->
             <div class="row g-3 mb-4 justify-content-center">
-
                 <div class="col-md-3">
                     <div class="card-box">
                         <div class="label">Hôm nay</div>
@@ -237,18 +236,79 @@
                 </div>
 
             </div>
-
         </div>
 
         <!-- ================= THEO PHIM ================= -->
         <div class="tab-pane fade" id="phim">
-
             <div class="chart-box">
                 <h5>🎬 Top phim doanh thu</h5>
+                     <div class="row g-3 mb-4 justify-content-center">
+                            <div class="col-md-3">
+                                <div class="card-box border-info">
+                                    <div class="label">Đang chiếu / Sắp chiếu</div>
+                                    <div class="value text-info">@Model.NowShowingCount / @Model.ComingSoonCount</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card-box border-primary">
+                                    <div class="label">Top bán chạy nhất</div>
+                                    <div class="value text-primary" style="font-size:16px">@Model.TopSellingMovie</div>
+                                    <div class="sub">@Model.TopSellingTickets vé</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card-box border-danger">
+                                    <div class="label">Bán ít nhất</div>
+                                    <div class="value text-danger" style="font-size:14px">@Model.LeastSellingMovie</div>
+                                    <div class="sub">@Model.LeastSellingTickets vé</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="card-box border-secondary">
+                                    <div class="label">Top doanh thu</div>
+                                    <div class="value text-secondary" style="font-size:16px">@Model.TopRevenueMovie</div>
+                                    <div class="sub">@Model.TopRevenueAmount.ToString("N0") ₫</div>
+                                </div>
+                             </div>
+                        <div class="row g-3 mb-4 justify-content-center">
+                            <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Hôm nay</div><div class="value text-primary">@Model.AvgOrderValueToday.ToString("N0") ₫</div></div></div>
+                            <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Tháng này</div><div class="value text-primary">@Model.AvgOrderValueMonth.ToString("N0") ₫</div></div></div>
+                            <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Quý này</div><div class="value text-primary">@Model.AvgOrderValueQuarter.ToString("N0") ₫</div></div></div>
+                            <div class="col-md-3"><div class="card-box border-primary"><div class="label">AOV Năm nay</div><div class="value text-primary">@Model.AvgOrderValueYear.ToString("N0") ₫</div></div></div>
+                        </div>
+                    </div>
+                <div class="row g-4">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="chart-box">
+                                <h5>📊 So sánh doanh thu theo Phim</h5>
+                                <canvas id="movieRevenueChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-box">
+                                <h5>🎟️ So sánh số vé đã bán</h5>
+                                <canvas id="ticketComparisonChart"></canvas>
+                            </div>
+                        </div>
+                    <div class="col-md-6">
+                        <div class="chart-box">
+                            <h5>💰 Biểu đồ so sánh giá trị đơn (AOV)</h5>
+                            <div class="chart-container" style="height: 300px;"><canvas id="aovChart"></canvas></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="chart-box">
+                            <h5>📊 So sánh doanh thu 2 tháng gần nhất</h5>
+                            <div class="chart-container" style="height: 300px;"><canvas id="monthCompareChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+                </div>
                 <canvas id="revenueByMovieChart"></canvas>
             </div>
-
         </div>
+
         <div class="tab-pane fade" id="suatchieu">
 
             <div class="chart-box">
@@ -452,6 +512,7 @@
     const revenueByYear = @Html.Raw(Json.Serialize(Model.RevenueByYear));
     const ticketCountByYear = @Html.Raw(Json.Serialize(Model.TicketCountByYear));
 
+        const ticketsByMovie = @Html.Raw(Json.Serialize(Model.TicketsByMovie));
     const movieLabels = @Html.Raw(Json.Serialize(Model.MovieLabels));
     const revenueByMovie = @Html.Raw(Json.Serialize(Model.RevenueByMovie));
         const showtimeLabels =
@@ -465,6 +526,8 @@
 
     const comboPieValues =
         @Html.Raw(Json.Serialize(Model.ComboPieValues));
+
+        const ctx = document.getElementById("ticketComparisonChart").getContext('2d');
 
 
    function createChart(id, labels, data1, data2) {
@@ -537,7 +600,103 @@
         }
     }
 );
-</script>
+        // 4. Biểu đồ Giá trị trung bình đơn (AOV)
+        new Chart(document.getElementById("aovChart"), {
+        type: 'bar',
+        data: {
+        labels: ['Hôm nay', 'Tháng này', 'Quý này', 'Năm nay'],
+        datasets: [{
+        label: 'Giá trị đơn trung bình (VND)',
+        data: [
+        @Model.AvgOrderValueToday,
+        @Model.AvgOrderValueMonth,
+        @Model.AvgOrderValueQuarter,
+        @Model.AvgOrderValueYear
+        ],
+        backgroundColor: [
+        'rgba(255, 99, 132, 0.7)',
+        'rgba(54, 162, 235, 0.7)',
+        'rgba(255, 206, 86, 0.7)',
+        'rgba(75, 192, 192, 0.7)'
+        ],
+        borderWidth: 1
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: true } }
+        }
+        });
+
+        // 5. Biểu đồ so sánh doanh thu 2 tháng gần nhất
+        new Chart(document.getElementById("monthCompareChart"), {
+        type: 'bar',
+        data: {
+        labels: ['Tháng trước', 'Tháng này'],
+        datasets: [{
+        label: 'Doanh thu (VND)',
+        data: [@Model.RevenueLastMonth, @Model.RevenueCurrentMonth],
+        backgroundColor: [
+        'rgba(142, 142, 147, 0.7)',
+        'rgba(40, 167, 69, 0.7)'
+        ],
+        borderColor: [
+        'rgba(142, 142, 147, 1)',
+        'rgba(40, 167, 69, 1)'
+        ],
+        borderWidth: 1
+        }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+        y: {
+        beginAtZero: true,
+        title: { display: true, text: 'Số tiền (₫)' }
+        }
+        }
+        }
+        });
+
+        // Vẽ biểu đồ Doanh thu (Bar)
+        new Chart(document.getElementById("movieRevenueChart"), {
+        type: 'bar',
+        data: {
+        labels: movieLabels,
+        datasets: [{
+        label: 'Doanh thu (₫)',
+        data: revenueByMovie,
+        backgroundColor: '#0d6efd'
+        }]
+        },
+        options: { responsive: true }
+        });
+
+        // Vẽ biểu đồ Số vé (Doughnut - cho thấy tỷ trọng mỗi phim chiếm bao nhiêu % tổng vé)
+        new Chart(ctx, {
+        type: 'bar',
+        data: {
+        labels: movieLabels,
+        datasets: [{
+        label: 'Số lượng vé',
+        data: ticketsByMovie,
+        backgroundColor: '#36a2eb', // Màu xanh dương chuyên nghiệp
+        borderRadius: 5 // Bo góc cột cho đẹp
+        }]
+        },
+        options: {
+        responsive: true,
+        scales: {
+        y: {
+        beginAtZero: true,
+        ticks: { stepSize: 1 } // Đảm bảo số vé hiển thị là số nguyên
+        }
+        }
+        }
+        });
+    </script>
 
 <!-- ================= STYLE ================= -->
 <style>
@@ -579,8 +738,28 @@
         box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
 
-    canvas { max-height: 350px; }
+    canvas { max-height: 350px;
+        height: auto !important;
+        }
+        /* Tạo hiệu ứng mượt mà khi hover vào chart-box giống như card-box */
+        .chart-box:hover {
+        transform: translateY(-3px);
+        transition: 0.3s;
+        }
 
+        /* Bổ sung cho bảng dữ liệu (Table) trong các tab */
+        .table-responsive {
+        overflow-x: auto;
+        }
+
+        /* Style cho tiêu đề trong chart-box */
+        .chart-box h5 {
+        color: #333;
+        font-weight: 700;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+        padding-bottom: 10px;
+        }
     .combo-card {
         background: #f8f9fa;
         border-radius: 15px;

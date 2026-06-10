@@ -2,24 +2,23 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using CINEMA.Controllers;
-using CINEMA.Models;
 
 namespace CINEMA.ViewComponents
 {
     public class RevenueDashboardViewComponent : ViewComponent
     {
-        private readonly CinemaContext _context;
+        private readonly StatisticsController _statisticsController;
 
-        public RevenueDashboardViewComponent(CinemaContext context)
+        // Tiêm trực tiếp StatisticsController vào qua DI (Cách của máy bạn)
+        public RevenueDashboardViewComponent(StatisticsController statisticsController)
         {
-            _context = context;
+            _statisticsController = statisticsController;
         }
 
         public async Task<IViewComponentResult> InvokeAsync(DateTime? from, DateTime? to)
         {
-            // Gọi chung hàm thống kê trong StatisticsController
-            var controller = new StatisticsController(_context);
-            var model = await controller.BuildDashboard(from, to);
+            // Gọi hàm xử lý dashboard từ controller đã gộp (Logic của Git)
+            var model = await _statisticsController.BuildDashboard(from, to);
 
             return View(model);
         }

@@ -1,4 +1,5 @@
-﻿using CINEMA.Models;
+﻿using CINEMA.Controllers;
+using CINEMA.Models;
 using CINEMA.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace CINEMA
 
             builder.Services.AddScoped<IVnpayService, VnpayService>();
             builder.Services.AddScoped<GeminiService>();
+            builder.Services.AddScoped<StatisticsController>();
 
             // 🟢 AUTH (PHẢI đặt trước Build)
             builder.Services.AddAuthentication(options =>
