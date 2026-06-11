@@ -71,7 +71,7 @@ namespace CINEMA.Controllers
             ViewBag.Error = "Sai tài khoản hoặc mật khẩu!";
             return View();
         }
-        public IActionResult Dashboard()
+      public IActionResult Dashboard()
         {
             if (HttpContext.Session.GetString("Role") != "Admin")
             {
@@ -79,6 +79,22 @@ namespace CINEMA.Controllers
             }
 
             ViewBag.Name = HttpContext.Session.GetString("Name");
+
+            ViewBag.TotalMovies = _context.Movies.Count();
+            ViewBag.TotalCustomers = _context.Customers.Count();
+            ViewBag.TotalOrders = _context.Orders.Count();
+
+            ViewBag.TopMovies = _context.Tickets
+                .GroupBy(t => t.Showtime.Movie.Title)
+                .Select(g => new
+                {
+                    MovieName = g.Key,
+                    TotalTickets = g.Count()
+                })
+                .OrderByDescending(x => x.TotalTickets)
+                .Take(5)
+                .ToList();
+
             return View();
         }
         public IActionResult Logout()

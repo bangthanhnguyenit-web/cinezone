@@ -15,4 +15,160 @@
 
     @await Component.InvokeAsync("RevenueDashboard")
 
+    <!-- THỐNG KÊ BỔ SUNG -->
+    <div class="row mt-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <h5>Tổng phim</h5>
+                    <h2 class="text-primary">@ViewBag.TotalMovies</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <h5>Tổng khách hàng</h5>
+                    <h2 class="text-success">@ViewBag.TotalCustomers</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body text-center">
+                    <h5>Tổng đơn hàng</h5>
+                    <h2 class="text-danger">@ViewBag.TotalOrders</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TOP PHIM -->
+    <div class="card shadow-sm border-0 mt-4">
+        <div class="card-header">
+            <h5 class="mb-0">🎬 Top phim bán chạy</h5>
+        </div>
+
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Phim</th>
+                        <th>Số vé</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var item in ViewBag.TopMovies)
+                    {
+                        <tr>
+                            <td>@item.MovieName</td>
+                            <td>@item.TotalTickets</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">🏆 Top 6 Nhân Viên Xuất Sắc</h5>
+            </div>
+
+            <div class="card-body">
+                <div class="row text-center">
+
+                  
+                    <div class="col-md-2">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <img src="~/images/employees/employee4.jpg"
+                                     class="rounded-circle mb-3"
+                                     width="100" height="100"
+                                     style="object-fit:cover;" />
+
+                                <h6 class="fw-bold">Lê Nguyễn Chính Đức</h6>
+                                <small class="text-muted">HR</small>
+
+                            </div>
+                        </div>
+                    </div>
+              
+                    <div class="col-md-2">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <img src="~/images/employees/employee3.jpg"
+                                     class="rounded-circle mb-3"
+                                     width="100" height="100"
+                                     style="object-fit:cover;" />
+
+                                <h6 class="fw-bold">Thái Vĩnh An</h6>
+                                <small class="text-muted">COO</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <img src="~/images/employees/employee1.jpg"
+                                     class="rounded-circle mb-3"
+                                     width="100" height="100"
+                                     style="object-fit:cover;" />
+
+                                <h6 class="fw-bold">Nguyễn Thị Băng Thanh</h6>
+                                <small class="text-muted">Chairman</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <img src="~/images/employees/employee2.jpg"
+                                     class="rounded-circle mb-3"
+                                     width="100" height="100"
+                                     style="object-fit:cover;" />
+
+                                <h6 class="fw-bold">Huỳnh Dĩnh Tâm</h6>
+                                <small class="text-muted">CMO</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <img src="~/images/employees/employee5.jpg"
+                                     class="rounded-circle mb-3"
+                                     width="100" height="100"
+                                     style="object-fit:cover;" />
+
+                                <h6 class="fw-bold">Lý Tấn Phát</h6>
+                                <small class="text-muted">Sercurity</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-2">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <img src="~/images/employees/employee6.jpg"
+                                     class="rounded-circle mb-3"
+                                     width="100" height="100"
+                                     style="object-fit:cover;" />
+
+                                <h6 class="fw-bold">Phan Văn Anh Tuấn</h6>
+                                <small class="text-muted">CFO</small>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
